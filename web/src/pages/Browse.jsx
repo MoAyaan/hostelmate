@@ -78,6 +78,11 @@ function RoomDetail({ room, block, onChanged }) {
                 </span>
                 <div className="text-sm flex-1">
                   <p className="font-bold">{o.name}</p>
+                  {(o.branch || o.homeState) && (
+                    <p style={{ color: "var(--ink-soft)" }}>
+                      {[o.branch, o.homeState].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
                   <p style={{ color: "var(--ink-soft)" }}>
                     {[o.instagram && `IG ${o.instagram}`, o.discord && `Discord ${o.discord}`, o.reddit && o.reddit].filter(Boolean).join(" · ") || "No socials shared"}
                   </p>

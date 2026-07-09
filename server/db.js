@@ -18,6 +18,8 @@ db.exec(`
     instagram TEXT,
     discord TEXT,
     phone TEXT,
+    branch TEXT,
+    home_state TEXT,
     delete_token TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );

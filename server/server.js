@@ -21,6 +21,8 @@ function serializeOccupant(row) {
     instagram: row.instagram || null,
     discord: row.discord || null,
     phone: row.phone || null,
+    branch: row.branch || null,
+    homeState: row.home_state || null,
   };
 }
 
@@ -139,7 +141,7 @@ app.get("/api/room", (req, res) => {
 
 // POST /api/occupants — add yourself to a room
 app.post("/api/occupants", (req, res) => {
-  const { block: blockRaw, room: roomRaw, roomCapacity, name, reddit, instagram, discord, phone } = req.body || {};
+  const { block: blockRaw, room: roomRaw, roomCapacity, name, reddit, instagram, discord, phone, branch, homeState } = req.body || {};
   const block = String(blockRaw || "").toUpperCase();
 
   if (!BLOCKS[block]) return res.status(400).json({ error: "Pick a valid block." });
@@ -198,8 +200,8 @@ app.post("/api/occupants", (req, res) => {
   const deleteToken = crypto.randomBytes(16).toString("hex");
 
   const insertOccupant = db.prepare(
-    `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone, delete_token)
-     VALUES (@block, @room, @floor, @name, @reddit, @instagram, @discord, @phone, @deleteToken)`
+    `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone, branch, home_state, delete_token)
+     VALUES (@block, @room, @floor, @name, @reddit, @instagram, @discord, @phone, @branch, @homeState, @deleteToken)`
   );
   const insertRoom = db.prepare(`INSERT OR IGNORE INTO rooms (block, room, capacity) VALUES (?, ?, ?)`);
 
@@ -214,6 +216,8 @@ app.post("/api/occupants", (req, res) => {
       instagram: instagram ? String(instagram).trim() : null,
       discord: discord ? String(discord).trim() : null,
       phone: phone ? String(phone).trim() : null,
+      branch: branch ? String(branch).trim() : null,
+      homeState: homeState ? String(homeState).trim() : null,
       deleteToken,
     });
   })();

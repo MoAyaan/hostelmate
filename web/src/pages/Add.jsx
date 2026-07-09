@@ -3,6 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import { addOccupant, getRoom, removeOccupant } from "../api.js";
 import { BLOCKS, GENDER_META, CAPACITY_LABEL } from "../blocks.js";
 import { rememberEntry, forgetEntry } from "../myEntries.js";
+import { BRANCHES, HOME_STATES, OTHER } from "../options.js";
 
 function Confetti() {
   const pieces = Array.from({ length: 16 });
@@ -31,6 +32,10 @@ export default function Add() {
     room: location.state?.room || "",
     roomCapacity: null,
     name: "",
+    branch: "",
+    branchOther: "",
+    homeState: "",
+    homeStateOther: "",
     reddit: "",
     instagram: "",
     discord: "",
@@ -76,7 +81,12 @@ export default function Add() {
     }
     setStatus("submitting");
     try {
-      const result = await addOccupant(form);
+      const payload = {
+        ...form,
+        branch: form.branch === OTHER ? form.branchOther.trim() : form.branch,
+        homeState: form.homeState === OTHER ? form.homeStateOther.trim() : form.homeState,
+      };
+      const result = await addOccupant(payload);
       const entry = { id: result.id, deleteToken: result.deleteToken, block: form.block, room: form.room };
       rememberEntry(entry);
       setSavedEntry(entry);
@@ -221,6 +231,57 @@ export default function Add() {
             className="mt-1 w-full rounded-lg px-3 py-2.5 border-2"
             style={{ borderColor: "var(--line-strong)", background: "var(--bg)" }}
           />
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>Branch (optional)</label>
+            <select
+              value={form.branch}
+              onChange={(e) => update("branch", e.target.value)}
+              className="mt-1 w-full rounded-lg px-3 py-2.5 border-2"
+              style={{ borderColor: "var(--line-strong)", background: "var(--bg)" }}
+            >
+              <option value="">Select branch…</option>
+              {BRANCHES.map((b) => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+              <option value={OTHER}>Other</option>
+            </select>
+            {form.branch === OTHER && (
+              <input
+                value={form.branchOther}
+                onChange={(e) => update("branchOther", e.target.value)}
+                placeholder="Type your branch/course"
+                className="mt-2 w-full rounded-lg px-3 py-2.5 border-2 animate-popIn"
+                style={{ borderColor: "var(--line-strong)", background: "var(--bg)" }}
+              />
+            )}
+          </div>
+          <div>
+            <label className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>Home state (optional)</label>
+            <select
+              value={form.homeState}
+              onChange={(e) => update("homeState", e.target.value)}
+              className="mt-1 w-full rounded-lg px-3 py-2.5 border-2"
+              style={{ borderColor: "var(--line-strong)", background: "var(--bg)" }}
+            >
+              <option value="">Select state…</option>
+              {HOME_STATES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+              <option value={OTHER}>Other / Outside India</option>
+            </select>
+            {form.homeState === OTHER && (
+              <input
+                value={form.homeStateOther}
+                onChange={(e) => update("homeStateOther", e.target.value)}
+                placeholder="Type your state/country"
+                className="mt-2 w-full rounded-lg px-3 py-2.5 border-2 animate-popIn"
+                style={{ borderColor: "var(--line-strong)", background: "var(--bg)" }}
+              />
+            )}
+          </div>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-4">
