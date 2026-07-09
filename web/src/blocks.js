@@ -16,6 +16,6 @@ export const GENDER_META = {
 
 export const STATUS_META = {
   empty: { label: "Open", var: "mint" },
-  partial: { label: "Partial", var: "amber" },
-  full: { label: "Full", var: "coral" },
+  partial: { label: "Partial", var: "amber", glow: true },
+  full: { label: "Full", var: "coral", glow: true },
 };

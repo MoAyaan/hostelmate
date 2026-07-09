@@ -18,6 +18,7 @@ function RoomTag({ room, onSelect, isSelected }) {
         background: filled ? bg : "var(--surface)",
         color: filled ? (room.status === "partial" ? "var(--amber-ink)" : "#fff") : "var(--ink)",
         border: `2px solid ${filled ? "transparent" : "var(--line-strong)"}`,
+        boxShadow: meta.glow ? `var(--${meta.var}-glow)` : "none",
         outline: isSelected ? "3px solid var(--violet)" : "none",
         outlineOffset: "2px",
       }}
@@ -28,7 +29,7 @@ function RoomTag({ room, onSelect, isSelected }) {
         <span
           aria-hidden="true"
           className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full"
-          style={{ background: "var(--amber)", boxShadow: "0 0 0 2px var(--surface)", animation: "pulseRing 1.8s ease-out infinite" }}
+          style={{ background: "var(--amber)", boxShadow: "0 0 0 2px var(--surface), var(--amber-glow)", animation: "pulseRing 1.8s ease-out infinite" }}
         />
       )}
     </button>
@@ -63,7 +64,11 @@ function RoomDetail({ room, block, onChanged }) {
         <h4 className="font-display text-xl">Room {room.room} <span style={{ color: "var(--ink-soft)" }} className="font-mono text-sm">· floor {room.floor}</span></h4>
         <span
           className="text-xs font-extrabold uppercase rounded-full px-3 py-1"
-          style={{ background: `var(--${meta.var})`, color: room.status === "partial" ? "var(--amber-ink)" : "#fff" }}
+          style={{
+            background: `var(--${meta.var})`,
+            color: room.status === "partial" ? "var(--amber-ink)" : "#fff",
+            boxShadow: meta.glow ? `var(--${meta.var}-glow)` : "none",
+          }}
         >
           {meta.label} · {room.occupants.length}/{room.capacity}
         </span>
@@ -207,8 +212,8 @@ export default function Browse() {
 
       <div className="mt-4 flex gap-4 text-sm font-bold flex-wrap">
         <span className="flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: "var(--mint)" }} />{counts.empty} open</span>
-        <span className="flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: "var(--amber)" }} />{counts.partial} partial</span>
-        <span className="flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: "var(--coral)" }} />{counts.full} full</span>
+        <span className="flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: "var(--amber)", boxShadow: "var(--amber-glow)" }} />{counts.partial} partial</span>
+        <span className="flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: "var(--coral)", boxShadow: "var(--coral-glow)" }} />{counts.full} full</span>
       </div>
 
       <div className="mt-8 grid lg:grid-cols-[1fr_320px] gap-8 items-start">
