@@ -25,14 +25,12 @@ db.exec(`
 `);
 
 export const BLOCKS = {
-  HB1: { label: "HB1", roomType: "Double • Common bath • Non-AC", ac: false, gender: "female" },
-  HB2: { label: "HB2", roomType: "Double • details TBD", ac: false, gender: "unspecified" },
-  HB3: { label: "HB3", roomType: "Double • Attached • AC", ac: true, gender: "female" },
-  HB4: { label: "HB4", roomType: "Double • Attached • AC", ac: true, gender: "male" },
-  HB5: { label: "HB5", roomType: "Double • Attached • Non-AC", ac: false, gender: "male" },
+  HB1: { label: "HB1", roomType: "Double • Common bath • Non-AC", ac: false, gender: "female", capacity: 2 },
+  HB2: { label: "HB2", roomType: "Triple • details TBD", ac: false, gender: "unspecified", capacity: 3 },
+  HB3: { label: "HB3", roomType: "Double • Attached • AC", ac: true, gender: "female", capacity: 2 },
+  HB4: { label: "HB4", roomType: "Double • Attached • AC", ac: true, gender: "male", capacity: 2 },
+  HB5: { label: "HB5", roomType: "Double • Attached • Non-AC", ac: false, gender: "male", capacity: 2 },
 };
-
-export const ROOM_CAPACITY = 2;
 
 // "710" -> { floor: "7", roomOnFloor: "10" }; "1205" -> { floor: "12", roomOnFloor: "05" }
 export function parseRoomCode(raw) {
