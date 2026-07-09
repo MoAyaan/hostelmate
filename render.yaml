@@ -16,13 +16,12 @@ services:
     rootDir: web
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    envVars:
-      - key: VITE_API_BASE
-        fromService:
-          type: web
-          name: hostelmate-api
-          property: host
     routes:
+      # Proxy API calls through the same origin as the site itself, so the browser never makes
+      # a cross-origin request to hostelmate-api.onrender.com (some networks block those).
+      - type: rewrite
+        source: /api/*
+        destination: https://hostelmate-api.onrender.com/api/:splat
       - type: rewrite
         source: /*
         destination: /index.html
