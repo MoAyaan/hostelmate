@@ -36,6 +36,13 @@ function normalizeHandle(value) {
   return trimmed.replace(/^u\//, "").replace(/^@/, "") || null;
 }
 
+// "+91 98xxxxxx21", "098xxxxxx21", "98xxxxxx21" all normalize to the same last-10-digits
+function normalizePhone(value) {
+  if (!value) return null;
+  const digits = String(value).replace(/\D/g, "");
+  return digits ? digits.slice(-10) : null;
+}
+
 // GET /api/blocks — summary per block
 app.get("/api/blocks", (req, res) => {
   const rows = db
@@ -145,15 +152,21 @@ app.post("/api/occupants", (req, res) => {
   if (!parsed) return res.status(400).json({ error: "Room number should look like 710 (floor 7, room 10)." });
 
   const roomOccupants = db
-    .prepare(`SELECT reddit, instagram, discord FROM occupants WHERE block = ? AND room = ?`)
+    .prepare(`SELECT reddit, instagram, discord, phone FROM occupants WHERE block = ? AND room = ?`)
     .all(block, parsed.code);
 
-  const incoming = { reddit: normalizeHandle(reddit), instagram: normalizeHandle(instagram), discord: normalizeHandle(discord) };
+  const incoming = {
+    reddit: normalizeHandle(reddit),
+    instagram: normalizeHandle(instagram),
+    discord: normalizeHandle(discord),
+    phone: normalizePhone(phone),
+  };
   const alreadyIn = roomOccupants.some(
     (o) =>
       (incoming.reddit && incoming.reddit === normalizeHandle(o.reddit)) ||
       (incoming.instagram && incoming.instagram === normalizeHandle(o.instagram)) ||
-      (incoming.discord && incoming.discord === normalizeHandle(o.discord))
+      (incoming.discord && incoming.discord === normalizeHandle(o.discord)) ||
+      (incoming.phone && incoming.phone === normalizePhone(o.phone))
   );
   if (alreadyIn) {
     return res.status(409).json({ error: `Looks like you're already listed in room ${parsed.code}. Remove your old entry first if you need to fix something.` });
