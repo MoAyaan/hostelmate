@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getBlocks, getRoom } from "../api.js";
-import { BLOCKS } from "../blocks.js";
+import { BLOCKS, GENDER_META } from "../blocks.js";
 
 function Blob({ className, color, style }) {
   return (
@@ -82,7 +82,7 @@ export default function Home() {
             className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide animate-popIn"
             style={{ background: "var(--amber)", color: "var(--amber-ink)" }}
           >
-            🏠 HB4 &amp; HB5 · MIT Bangalore
+            🏠 HB1–HB5 · MIT Bangalore
           </span>
 
           <h1 className="font-display mt-5 leading-[1.05]" style={{ fontSize: "clamp(2.4rem, 6vw, 4.2rem)" }}>
@@ -112,7 +112,7 @@ export default function Home() {
               className="rounded-full px-6 py-3 font-bold border-2 hover:-translate-y-0.5 transition-transform"
               style={{ borderColor: "var(--ink)", color: "var(--ink)" }}
             >
-              Browse HB4 / HB5
+              Browse all blocks
             </Link>
           </div>
 
@@ -185,11 +185,12 @@ export default function Home() {
       {/* BLOCKS */}
       <section className="max-w-6xl mx-auto px-6 py-10">
         <h2 className="font-display text-3xl">Pick your block</h2>
-        <p className="mt-2" style={{ color: "var(--ink-soft)" }}>Two hostel blocks, two very different AC situations.</p>
-        <div className="mt-8 grid sm:grid-cols-2 gap-6">
+        <p className="mt-2" style={{ color: "var(--ink-soft)" }}>Five hostel blocks, each with its own AC situation.</p>
+        <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Object.entries(BLOCKS).map(([key, meta], i) => {
             const s = summary?.blocks.find((b) => b.block === key);
             const accentVar = `var(--${meta.accent})`;
+            const gender = GENDER_META[meta.gender];
             return (
               <Link
                 key={key}
@@ -202,19 +203,27 @@ export default function Home() {
                   className="absolute -right-6 -top-6 w-28 h-28 rounded-full opacity-20 group-hover:scale-110 transition-transform"
                   style={{ background: accentVar }}
                 />
-                <div className="flex items-center gap-3">
-                  <span
-                    className="w-12 h-12 rounded-2xl grid place-items-center text-2xl"
-                    style={{ background: accentVar, transform: `rotate(${i % 2 ? 6 : -6}deg)`, animation: "floatY 5s ease-in-out infinite", ["--rot"]: `${i % 2 ? 6 : -6}deg` }}
-                  >
-                    {meta.ac ? "❄️" : "🌀"}
-                  </span>
-                  <div>
-                    <h3 className="font-display text-2xl">{meta.label}</h3>
-                    <p className="text-sm" style={{ color: "var(--ink-soft)" }}>{meta.roomType}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="w-12 h-12 rounded-2xl grid place-items-center text-2xl"
+                      style={{ background: accentVar, transform: `rotate(${i % 2 ? 6 : -6}deg)`, animation: "floatY 5s ease-in-out infinite", ["--rot"]: `${i % 2 ? 6 : -6}deg` }}
+                    >
+                      {meta.ac ? "❄️" : "🌀"}
+                    </span>
+                    <div>
+                      <h3 className="font-display text-2xl">{meta.label}</h3>
+                      <p className="text-sm" style={{ color: "var(--ink-soft)" }}>{meta.roomType}</p>
+                    </div>
                   </div>
+                  <span
+                    className="text-xs font-extrabold uppercase tracking-wide rounded-full px-2.5 py-1 shrink-0"
+                    style={{ background: "var(--surface-2)", color: "var(--ink-soft)" }}
+                  >
+                    {gender.icon} {gender.label}
+                  </span>
                 </div>
-                <div className="mt-5 flex gap-4 text-sm font-bold">
+                <div className="mt-5 flex gap-4 text-sm font-bold flex-wrap">
                   <span style={{ color: "var(--ink-soft)" }}>{s?.roomCount ?? 0} rooms logged</span>
                   <span style={{ color: "var(--amber-ink)" }}>{s?.partial ?? 0} partial</span>
                   <span style={{ color: "var(--coral-ink)" }}>{s?.full ?? 0} full</span>

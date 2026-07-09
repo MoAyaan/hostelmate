@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { addOccupant } from "../api.js";
-import { BLOCKS } from "../blocks.js";
+import { BLOCKS, GENDER_META } from "../blocks.js";
 
 function Confetti() {
   const pieces = Array.from({ length: 16 });
@@ -85,22 +85,26 @@ export default function Add() {
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 rounded-2xl p-6 flex flex-col gap-5" style={{ background: "var(--surface)", boxShadow: "var(--shadow-card)" }}>
-        <div className="grid grid-cols-2 gap-4">
-          {Object.entries(BLOCKS).map(([key, meta]) => (
-            <button
-              type="button"
-              key={key}
-              onClick={() => update("block", key)}
-              className="rounded-xl px-4 py-3 font-bold border-2 text-left transition-all"
-              style={{
-                borderColor: form.block === key ? "var(--violet)" : "var(--line-strong)",
-                background: form.block === key ? "var(--surface-2)" : "transparent",
-              }}
-            >
-              <div className="flex items-center gap-2">{meta.ac ? "❄️" : "🌀"} {meta.label}</div>
-              <div className="text-xs font-normal mt-0.5" style={{ color: "var(--ink-soft)" }}>{meta.roomType}</div>
-            </button>
-          ))}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {Object.entries(BLOCKS).map(([key, meta]) => {
+            const gender = GENDER_META[meta.gender];
+            return (
+              <button
+                type="button"
+                key={key}
+                onClick={() => update("block", key)}
+                className="rounded-xl px-4 py-3 font-bold border-2 text-left transition-all"
+                style={{
+                  borderColor: form.block === key ? "var(--violet)" : "var(--line-strong)",
+                  background: form.block === key ? "var(--surface-2)" : "transparent",
+                }}
+              >
+                <div className="flex items-center gap-2">{meta.ac ? "❄️" : "🌀"} {meta.label}</div>
+                <div className="text-xs font-normal mt-0.5" style={{ color: "var(--ink-soft)" }}>{meta.roomType}</div>
+                <div className="text-xs font-normal mt-1" style={{ color: "var(--ink-soft)" }}>{gender.icon} {gender.label}</div>
+              </button>
+            );
+          })}
         </div>
 
         <div>

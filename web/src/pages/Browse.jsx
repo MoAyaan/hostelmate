@@ -108,7 +108,7 @@ export default function Browse() {
       <h1 className="font-display text-3xl">Browse rooms</h1>
       <p className="mt-2" style={{ color: "var(--ink-soft)" }}>Only rooms someone's actually added show up here.</p>
 
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex gap-3 flex-wrap">
         {Object.entries(BLOCKS).map(([key, meta]) => (
           <button
             key={key}
