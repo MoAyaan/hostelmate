@@ -29,6 +29,13 @@ function getRoomCapacity(block, room) {
   return row ? row.capacity : null;
 }
 
+// "@Handle", "u/Handle", "  handle " all normalize to the same "handle" for comparison
+function normalizeHandle(value) {
+  if (!value) return null;
+  const trimmed = String(value).trim().toLowerCase();
+  return trimmed.replace(/^u\//, "").replace(/^@/, "") || null;
+}
+
 // GET /api/blocks — summary per block
 app.get("/api/blocks", (req, res) => {
   const rows = db
@@ -136,6 +143,21 @@ app.post("/api/occupants", (req, res) => {
 
   const parsed = parseRoomCode(roomRaw);
   if (!parsed) return res.status(400).json({ error: "Room number should look like 710 (floor 7, room 10)." });
+
+  const roomOccupants = db
+    .prepare(`SELECT reddit, instagram, discord FROM occupants WHERE block = ? AND room = ?`)
+    .all(block, parsed.code);
+
+  const incoming = { reddit: normalizeHandle(reddit), instagram: normalizeHandle(instagram), discord: normalizeHandle(discord) };
+  const alreadyIn = roomOccupants.some(
+    (o) =>
+      (incoming.reddit && incoming.reddit === normalizeHandle(o.reddit)) ||
+      (incoming.instagram && incoming.instagram === normalizeHandle(o.instagram)) ||
+      (incoming.discord && incoming.discord === normalizeHandle(o.discord))
+  );
+  if (alreadyIn) {
+    return res.status(409).json({ error: `Looks like you're already listed in room ${parsed.code}. Remove your old entry first if you need to fix something.` });
+  }
 
   const options = BLOCKS[block].capacities;
   let capacity = getRoomCapacity(block, parsed.code);
