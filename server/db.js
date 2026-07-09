@@ -22,14 +22,23 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_occupants_block_room ON occupants(block, room);
+
+  -- capacity is decided by whoever adds themselves first to a given room,
+  -- since blocks like HB2 mix Double and Triple rooms with no way to tell from the room number alone.
+  CREATE TABLE IF NOT EXISTS rooms (
+    block TEXT NOT NULL,
+    room TEXT NOT NULL,
+    capacity INTEGER NOT NULL,
+    PRIMARY KEY (block, room)
+  );
 `);
 
 export const BLOCKS = {
-  HB1: { label: "HB1", roomType: "Double • Common bath • Non-AC", ac: false, gender: "female", capacity: 2 },
-  HB2: { label: "HB2", roomType: "Triple • details TBD", ac: false, gender: "unspecified", capacity: 3 },
-  HB3: { label: "HB3", roomType: "Double • Attached • AC", ac: true, gender: "female", capacity: 2 },
-  HB4: { label: "HB4", roomType: "Double • Attached • AC", ac: true, gender: "male", capacity: 2 },
-  HB5: { label: "HB5", roomType: "Double • Attached • Non-AC", ac: false, gender: "male", capacity: 2 },
+  HB1: { label: "HB1", roomType: "Double • Common bath • Non-AC", ac: false, gender: "female", capacities: [2] },
+  HB2: { label: "HB2", roomType: "Double or Triple • details TBD", ac: false, gender: "unspecified", capacities: [2, 3] },
+  HB3: { label: "HB3", roomType: "Double • Attached • AC", ac: true, gender: "female", capacities: [2] },
+  HB4: { label: "HB4", roomType: "Double • Attached • AC", ac: true, gender: "male", capacities: [2] },
+  HB5: { label: "HB5", roomType: "Double • Attached • Non-AC", ac: false, gender: "male", capacities: [2] },
 };
 
 // "710" -> { floor: "7", roomOnFloor: "10" }; "1205" -> { floor: "12", roomOnFloor: "05" }

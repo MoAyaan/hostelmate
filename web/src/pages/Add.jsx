@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { addOccupant } from "../api.js";
-import { BLOCKS, GENDER_META } from "../blocks.js";
+import { addOccupant, getRoom } from "../api.js";
+import { BLOCKS, GENDER_META, CAPACITY_LABEL } from "../blocks.js";
 
 function Confetti() {
   const pieces = Array.from({ length: 16 });
@@ -28,6 +28,7 @@ export default function Add() {
   const [form, setForm] = useState({
     block: location.state?.block || "HB4",
     room: location.state?.room || "",
+    roomCapacity: null,
     name: "",
     reddit: "",
     instagram: "",
@@ -36,18 +37,40 @@ export default function Add() {
   });
   const [status, setStatus] = useState("idle"); // idle | submitting | done | error
   const [error, setError] = useState("");
+  const [lockedCapacity, setLockedCapacity] = useState(null);
+
+  useEffect(() => {
+    if (!location.state?.block || !location.state?.room) return;
+    getRoom(location.state.block, location.state.room)
+      .then((data) => {
+        if (data.capacityConfirmed) setLockedCapacity(data.capacity);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const roomValid = /^\d{3,}$/.test(form.room.trim());
   const floorPreview = roomValid ? form.room.trim().slice(0, -2) : null;
   const roomOnFloorPreview = roomValid ? form.room.trim().slice(-2) : null;
+  const capacityOptions = BLOCKS[form.block].capacities;
+  const needsCapacityChoice = capacityOptions.length > 1 && !lockedCapacity;
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
+  function selectBlock(key) {
+    setForm((f) => ({ ...f, block: key, roomCapacity: null }));
+    setLockedCapacity(null);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    if (needsCapacityChoice && !form.roomCapacity) {
+      setError(`Say whether room ${form.room || "this"} is a ${capacityOptions.map((c) => CAPACITY_LABEL[c]).join(" or ")} room.`);
+      return;
+    }
     setStatus("submitting");
     try {
       await addOccupant(form);
@@ -92,7 +115,7 @@ export default function Add() {
               <button
                 type="button"
                 key={key}
-                onClick={() => update("block", key)}
+                onClick={() => selectBlock(key)}
                 className="rounded-xl px-4 py-3 font-bold border-2 text-left transition-all"
                 style={{
                   borderColor: form.block === key ? "var(--violet)" : "var(--line-strong)",
@@ -121,6 +144,39 @@ export default function Add() {
             {roomValid ? `→ floor ${floorPreview}, room ${roomOnFloorPreview}` : "First digits are the floor, last two are the room (e.g. 710 = floor 7, room 10)."}
           </p>
         </div>
+
+        {lockedCapacity && (
+          <p className="text-xs -mt-2" style={{ color: "var(--ink-soft)" }}>
+            🔒 Room {form.room} is already set as a {CAPACITY_LABEL[lockedCapacity]} ({lockedCapacity}-person) room.
+          </p>
+        )}
+
+        {needsCapacityChoice && (
+          <div className="animate-popIn">
+            <label className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>
+              Is this room a {capacityOptions.map((c) => CAPACITY_LABEL[c]).join(" or ")}? *
+            </label>
+            <div className="mt-1 flex gap-3">
+              {capacityOptions.map((c) => (
+                <button
+                  type="button"
+                  key={c}
+                  onClick={() => update("roomCapacity", c)}
+                  className="flex-1 rounded-lg px-4 py-2.5 font-bold border-2 transition-all"
+                  style={{
+                    borderColor: form.roomCapacity === c ? "var(--violet)" : "var(--line-strong)",
+                    background: form.roomCapacity === c ? "var(--surface-2)" : "transparent",
+                  }}
+                >
+                  {CAPACITY_LABEL[c]} <span className="font-normal" style={{ color: "var(--ink-soft)" }}>({c} people)</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs mt-1" style={{ color: "var(--ink-soft)" }}>
+              Only asked once per room — whoever adds themselves first locks this in for everyone after.
+            </p>
+          </div>
+        )}
 
         <div>
           <label className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>Your name *</label>

@@ -23,9 +23,20 @@ function serializeOccupant(row) {
   };
 }
 
+function getRoomCapacity(block, room) {
+  const row = db.prepare(`SELECT capacity FROM rooms WHERE block = ? AND room = ?`).get(block, room);
+  return row ? row.capacity : null;
+}
+
 // GET /api/blocks — summary per block
 app.get("/api/blocks", (req, res) => {
-  const rows = db.prepare(`SELECT block, room, COUNT(*) as cnt FROM occupants GROUP BY block, room`).all();
+  const rows = db
+    .prepare(
+      `SELECT o.block as block, o.room as room, COUNT(*) as cnt, r.capacity as capacity
+       FROM occupants o JOIN rooms r ON r.block = o.block AND r.room = o.room
+       GROUP BY o.block, o.room`
+    )
+    .all();
 
   const summary = Object.fromEntries(
     Object.keys(BLOCKS).map((b) => [b, { roomCount: 0, full: 0, partial: 0 }])
@@ -35,7 +46,7 @@ app.get("/api/blocks", (req, res) => {
     const s = summary[row.block];
     if (!s) continue;
     s.roomCount += 1;
-    if (row.cnt >= BLOCKS[row.block].capacity) s.full += 1;
+    if (row.cnt >= row.capacity) s.full += 1;
     else if (row.cnt > 0) s.partial += 1;
   }
 
@@ -45,7 +56,7 @@ app.get("/api/blocks", (req, res) => {
       label: meta.label,
       roomType: meta.roomType,
       ac: meta.ac,
-      capacity: meta.capacity,
+      capacities: meta.capacities,
       ...summary[key],
     })),
   });
@@ -55,11 +66,12 @@ app.get("/api/blocks", (req, res) => {
 app.get("/api/rooms", (req, res) => {
   const block = String(req.query.block || "").toUpperCase();
   if (!BLOCKS[block]) return res.status(400).json({ error: "Unknown block" });
-  const capacity = BLOCKS[block].capacity;
 
   const rows = db
     .prepare(`SELECT * FROM occupants WHERE block = ? ORDER BY floor, room, id`)
     .all(block);
+  const capRows = db.prepare(`SELECT room, capacity FROM rooms WHERE block = ?`).all(block);
+  const capMap = new Map(capRows.map((r) => [r.room, r.capacity]));
 
   const rooms = new Map();
   for (const row of rows) {
@@ -69,6 +81,7 @@ app.get("/api/rooms", (req, res) => {
 
   const floors = new Map();
   for (const room of rooms.values()) {
+    const capacity = capMap.get(room.room) ?? BLOCKS[block].capacities[0];
     const status = statusFor(room.occupants.length, capacity);
     const entry = { ...room, status, capacity };
     if (!floors.has(room.floor)) floors.set(room.floor, []);
@@ -90,13 +103,13 @@ app.get("/api/room", (req, res) => {
   const block = String(req.query.block || "").toUpperCase();
   const roomRaw = String(req.query.room || "");
   if (!BLOCKS[block]) return res.status(400).json({ error: "Unknown block" });
-  const capacity = BLOCKS[block].capacity;
   const parsed = parseRoomCode(roomRaw);
   if (!parsed) return res.status(400).json({ error: "Room number should look like 710 (floor 7, room 10)" });
 
   const rows = db
     .prepare(`SELECT * FROM occupants WHERE block = ? AND room = ? ORDER BY id`)
     .all(block, parsed.code);
+  const capacity = getRoomCapacity(block, parsed.code) ?? BLOCKS[block].capacities[0];
 
   res.json({
     block,
@@ -104,17 +117,17 @@ app.get("/api/room", (req, res) => {
     floor: parsed.floor,
     status: statusFor(rows.length, capacity),
     capacity,
+    capacityConfirmed: rows.length > 0,
     occupants: rows.map(serializeOccupant),
   });
 });
 
 // POST /api/occupants — add yourself to a room
 app.post("/api/occupants", (req, res) => {
-  const { block: blockRaw, room: roomRaw, name, reddit, instagram, discord, phone } = req.body || {};
+  const { block: blockRaw, room: roomRaw, roomCapacity, name, reddit, instagram, discord, phone } = req.body || {};
   const block = String(blockRaw || "").toUpperCase();
 
   if (!BLOCKS[block]) return res.status(400).json({ error: "Pick a valid block." });
-  const capacity = BLOCKS[block].capacity;
   if (!name || !String(name).trim()) return res.status(400).json({ error: "Add your name so roommates recognize you." });
   if (!reddit && !instagram && !discord) {
     return res.status(400).json({ error: "Add at least one of Reddit, Instagram, or Discord." });
@@ -122,6 +135,21 @@ app.post("/api/occupants", (req, res) => {
 
   const parsed = parseRoomCode(roomRaw);
   if (!parsed) return res.status(400).json({ error: "Room number should look like 710 (floor 7, room 10)." });
+
+  const options = BLOCKS[block].capacities;
+  let capacity = getRoomCapacity(block, parsed.code);
+
+  if (capacity == null) {
+    if (options.length === 1) {
+      capacity = options[0];
+    } else {
+      const chosen = Number(roomCapacity);
+      if (!options.includes(chosen)) {
+        return res.status(400).json({ error: `Say whether room ${parsed.code} is a ${options.join(" or ")}-person room.` });
+      }
+      capacity = chosen;
+    }
+  }
 
   const existing = db
     .prepare(`SELECT COUNT(*) as cnt FROM occupants WHERE block = ? AND room = ?`)
@@ -131,12 +159,15 @@ app.post("/api/occupants", (req, res) => {
     return res.status(409).json({ error: `Room ${parsed.code} already has ${capacity} people in it — it's full.` });
   }
 
-  const info = db
-    .prepare(
-      `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone)
-       VALUES (@block, @room, @floor, @name, @reddit, @instagram, @discord, @phone)`
-    )
-    .run({
+  const insertOccupant = db.prepare(
+    `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone)
+     VALUES (@block, @room, @floor, @name, @reddit, @instagram, @discord, @phone)`
+  );
+  const insertRoom = db.prepare(`INSERT OR IGNORE INTO rooms (block, room, capacity) VALUES (?, ?, ?)`);
+
+  const info = db.transaction(() => {
+    insertRoom.run(block, parsed.code, capacity);
+    return insertOccupant.run({
       block,
       room: parsed.code,
       floor: parsed.floor,
@@ -146,9 +177,10 @@ app.post("/api/occupants", (req, res) => {
       discord: discord ? String(discord).trim() : null,
       phone: phone ? String(phone).trim() : null,
     });
+  })();
 
   const count = existing.cnt + 1;
-  res.status(201).json({ ok: true, id: info.lastInsertRowid, status: statusFor(count, capacity) });
+  res.status(201).json({ ok: true, id: info.lastInsertRowid, status: statusFor(count, capacity), capacity });
 });
 
 const PORT = process.env.PORT || 8790;
