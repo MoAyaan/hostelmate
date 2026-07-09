@@ -87,7 +87,7 @@ function RoomDetail({ room, block, onChanged }) {
                     </p>
                   )}
                   <p style={{ color: "var(--ink-soft)" }}>
-                    {[o.instagram && `IG ${o.instagram}`, o.discord && `Discord ${o.discord}`, o.reddit && o.reddit].filter(Boolean).join(" · ") || "No socials shared"}
+                    {[o.instagram && `IG ${o.instagram}`, o.discord && `Discord ${o.discord}`, o.reddit && o.reddit, o.phone && `📱 ${o.phone}`].filter(Boolean).join(" · ") || "No socials shared"}
                   </p>
                 </div>
                 {mine && (

@@ -166,7 +166,7 @@ export default function Home() {
                 ) : (
                   <ul className="text-sm mt-1 flex flex-col gap-0.5">
                     {quickResult.occupants.map((o) => (
-                      <li key={o.id}>👤 {o.name} {o.instagram && `· IG ${o.instagram}`} {o.discord && `· Discord ${o.discord}`} {o.reddit && `· ${o.reddit}`}</li>
+                      <li key={o.id}>👤 {o.name} {o.instagram && `· IG ${o.instagram}`} {o.discord && `· Discord ${o.discord}`} {o.reddit && `· ${o.reddit}`} {o.phone && `· 📱 ${o.phone}`}</li>
                     ))}
                   </ul>
                 )}
