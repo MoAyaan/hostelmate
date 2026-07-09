@@ -1,40 +1,45 @@
-import Database from "better-sqlite3";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import pg from "pg";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-export const db = new Database(path.join(__dirname, "hostel.db"));
+const { Pool } = pg;
 
-db.pragma("journal_mode = WAL");
+const connectionString = process.env.DATABASE_URL || "postgres://localhost:5432/hostelmate";
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS occupants (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    block TEXT NOT NULL,
-    room TEXT NOT NULL,
-    floor TEXT NOT NULL,
-    name TEXT NOT NULL,
-    reddit TEXT,
-    instagram TEXT,
-    discord TEXT,
-    phone TEXT,
-    branch TEXT,
-    home_state TEXT,
-    delete_token TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
+export const pool = new Pool({
+  connectionString,
+  ssl: connectionString.includes("localhost") ? false : { rejectUnauthorized: false },
+});
 
-  CREATE INDEX IF NOT EXISTS idx_occupants_block_room ON occupants(block, room);
+export async function initDb() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS occupants (
+      id SERIAL PRIMARY KEY,
+      block TEXT NOT NULL,
+      room TEXT NOT NULL,
+      floor TEXT NOT NULL,
+      name TEXT NOT NULL,
+      reddit TEXT,
+      instagram TEXT,
+      discord TEXT,
+      phone TEXT,
+      branch TEXT,
+      home_state TEXT,
+      delete_token TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_occupants_block_room ON occupants(block, room);`);
 
-  -- capacity is decided by whoever adds themselves first to a given room,
-  -- since blocks like HB2 mix Double and Triple rooms with no way to tell from the room number alone.
-  CREATE TABLE IF NOT EXISTS rooms (
-    block TEXT NOT NULL,
-    room TEXT NOT NULL,
-    capacity INTEGER NOT NULL,
-    PRIMARY KEY (block, room)
-  );
-`);
+  // capacity is decided by whoever adds themselves first to a given room,
+  // since blocks like HB1/HB2 mix Double and Triple rooms with no way to tell from the room number alone.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS rooms (
+      block TEXT NOT NULL,
+      room TEXT NOT NULL,
+      capacity INTEGER NOT NULL,
+      PRIMARY KEY (block, room)
+    );
+  `);
+}
 
 export const BLOCKS = {
   HB1: { label: "HB1", roomType: "Double or Triple • Common bath • Non-AC", ac: false, gender: "female", capacities: [2, 3] },
