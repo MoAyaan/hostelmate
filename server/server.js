@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import crypto from "node:crypto";
 import { db, BLOCKS, parseRoomCode } from "./db.js";
 
 const app = express();
@@ -159,9 +160,11 @@ app.post("/api/occupants", (req, res) => {
     return res.status(409).json({ error: `Room ${parsed.code} already has ${capacity} people in it — it's full.` });
   }
 
+  const deleteToken = crypto.randomBytes(16).toString("hex");
+
   const insertOccupant = db.prepare(
-    `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone)
-     VALUES (@block, @room, @floor, @name, @reddit, @instagram, @discord, @phone)`
+    `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone, delete_token)
+     VALUES (@block, @room, @floor, @name, @reddit, @instagram, @discord, @phone, @deleteToken)`
   );
   const insertRoom = db.prepare(`INSERT OR IGNORE INTO rooms (block, room, capacity) VALUES (?, ?, ?)`);
 
@@ -176,11 +179,33 @@ app.post("/api/occupants", (req, res) => {
       instagram: instagram ? String(instagram).trim() : null,
       discord: discord ? String(discord).trim() : null,
       phone: phone ? String(phone).trim() : null,
+      deleteToken,
     });
   })();
 
   const count = existing.cnt + 1;
-  res.status(201).json({ ok: true, id: info.lastInsertRowid, status: statusFor(count, capacity), capacity });
+  res.status(201).json({
+    ok: true,
+    id: info.lastInsertRowid,
+    status: statusFor(count, capacity),
+    capacity,
+    deleteToken,
+  });
+});
+
+// DELETE /api/occupants/:id — remove yourself (e.g. picked the wrong room)
+app.delete("/api/occupants/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const { deleteToken } = req.body || {};
+
+  const row = db.prepare(`SELECT id, delete_token FROM occupants WHERE id = ?`).get(id);
+  if (!row) return res.status(404).json({ error: "That entry is already gone." });
+  if (!deleteToken || row.delete_token !== deleteToken) {
+    return res.status(403).json({ error: "That's not your entry to remove." });
+  }
+
+  db.prepare(`DELETE FROM occupants WHERE id = ?`).run(id);
+  res.json({ ok: true });
 });
 
 const PORT = process.env.PORT || 8790;

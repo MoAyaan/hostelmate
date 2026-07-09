@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { addOccupant, getRoom } from "../api.js";
+import { addOccupant, getRoom, removeOccupant } from "../api.js";
 import { BLOCKS, GENDER_META, CAPACITY_LABEL } from "../blocks.js";
+import { rememberEntry, forgetEntry } from "../myEntries.js";
 
 function Confetti() {
   const pieces = Array.from({ length: 16 });
@@ -38,6 +39,8 @@ export default function Add() {
   const [status, setStatus] = useState("idle"); // idle | submitting | done | error
   const [error, setError] = useState("");
   const [lockedCapacity, setLockedCapacity] = useState(null);
+  const [savedEntry, setSavedEntry] = useState(null);
+  const [undoing, setUndoing] = useState(false);
 
   useEffect(() => {
     if (!location.state?.block || !location.state?.room) return;
@@ -73,11 +76,29 @@ export default function Add() {
     }
     setStatus("submitting");
     try {
-      await addOccupant(form);
+      const result = await addOccupant(form);
+      const entry = { id: result.id, deleteToken: result.deleteToken, block: form.block, room: form.room };
+      rememberEntry(entry);
+      setSavedEntry(entry);
       setStatus("done");
     } catch (err) {
       setError(err.message);
       setStatus("error");
+    }
+  }
+
+  async function handleUndo() {
+    if (!savedEntry) return;
+    setUndoing(true);
+    try {
+      await removeOccupant(savedEntry.id, savedEntry.deleteToken);
+      forgetEntry(savedEntry.id);
+      setStatus("idle");
+      setSavedEntry(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUndoing(false);
     }
   }
 
@@ -90,11 +111,23 @@ export default function Add() {
         <p className="mt-3 animate-riseIn" style={{ color: "var(--ink-soft)", animationDelay: ".1s" }}>
           Room {form.room} in {form.block} now knows you're coming. Check the browse page to see it live.
         </p>
-        <div className="mt-8 flex justify-center gap-3 animate-riseIn" style={{ animationDelay: ".2s" }}>
+        <div className="mt-8 flex flex-wrap justify-center gap-3 animate-riseIn" style={{ animationDelay: ".2s" }}>
           <Link to="/browse" state={{ block: form.block }} className="rounded-full px-6 py-3 font-bold text-white" style={{ background: "var(--violet)" }}>
             View {form.block} rooms →
           </Link>
+          <button
+            type="button"
+            onClick={handleUndo}
+            disabled={undoing}
+            className="rounded-full px-6 py-3 font-bold border-2 disabled:opacity-60"
+            style={{ borderColor: "var(--line-strong)", color: "var(--ink-soft)" }}
+          >
+            {undoing ? "Removing…" : "Wrong room? Undo"}
+          </button>
         </div>
+        {error && (
+          <p className="mt-4 text-sm font-semibold" style={{ color: "var(--coral-ink)" }}>⚠️ {error}</p>
+        )}
       </div>
     );
   }

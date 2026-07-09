@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { getRooms } from "../api.js";
+import { getRooms, removeOccupant } from "../api.js";
 import { BLOCKS, STATUS_META } from "../blocks.js";
+import { findEntry, forgetEntry } from "../myEntries.js";
 
 function RoomTag({ room, onSelect, isSelected }) {
   const meta = STATUS_META[room.status];
@@ -31,9 +32,28 @@ function RoomTag({ room, onSelect, isSelected }) {
   );
 }
 
-function RoomDetail({ room, block }) {
+function RoomDetail({ room, block, onChanged }) {
+  const [removingId, setRemovingId] = useState(null);
+  const [removeError, setRemoveError] = useState("");
   if (!room) return null;
   const meta = STATUS_META[room.status];
+
+  async function handleRemove(occupantId) {
+    const entry = findEntry(occupantId);
+    if (!entry) return;
+    setRemoveError("");
+    setRemovingId(occupantId);
+    try {
+      await removeOccupant(occupantId, entry.deleteToken);
+      forgetEntry(occupantId);
+      onChanged();
+    } catch (err) {
+      setRemoveError(err.message);
+    } finally {
+      setRemovingId(null);
+    }
+  }
+
   return (
     <div className="rounded-2xl p-5 animate-popIn" style={{ background: "var(--surface)", boxShadow: "var(--shadow-pop)" }}>
       <div className="flex items-center justify-between">
@@ -49,20 +69,38 @@ function RoomDetail({ room, block }) {
         <p className="mt-3 text-sm" style={{ color: "var(--ink-soft)" }}>Nobody's claimed this room yet.</p>
       ) : (
         <ul className="mt-4 flex flex-col gap-3">
-          {room.occupants.map((o) => (
-            <li key={o.id} className="flex items-start gap-3 rounded-xl p-3" style={{ background: "var(--surface-2)" }}>
-              <span className="w-9 h-9 rounded-full grid place-items-center font-display text-white shrink-0" style={{ background: "var(--violet)" }}>
-                {o.name.charAt(0).toUpperCase()}
-              </span>
-              <div className="text-sm">
-                <p className="font-bold">{o.name}</p>
-                <p style={{ color: "var(--ink-soft)" }}>
-                  {[o.instagram && `IG ${o.instagram}`, o.discord && `Discord ${o.discord}`, o.reddit && o.reddit].filter(Boolean).join(" · ") || "No socials shared"}
-                </p>
-              </div>
-            </li>
-          ))}
+          {room.occupants.map((o) => {
+            const mine = findEntry(o.id);
+            return (
+              <li key={o.id} className="flex items-start gap-3 rounded-xl p-3" style={{ background: "var(--surface-2)" }}>
+                <span className="w-9 h-9 rounded-full grid place-items-center font-display text-white shrink-0" style={{ background: "var(--violet)" }}>
+                  {o.name.charAt(0).toUpperCase()}
+                </span>
+                <div className="text-sm flex-1">
+                  <p className="font-bold">{o.name}</p>
+                  <p style={{ color: "var(--ink-soft)" }}>
+                    {[o.instagram && `IG ${o.instagram}`, o.discord && `Discord ${o.discord}`, o.reddit && o.reddit].filter(Boolean).join(" · ") || "No socials shared"}
+                  </p>
+                </div>
+                {mine && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(o.id)}
+                    disabled={removingId === o.id}
+                    className="shrink-0 text-xs font-bold rounded-full px-2.5 py-1 disabled:opacity-60"
+                    style={{ color: "var(--coral-ink)", background: "color-mix(in srgb, var(--coral) 18%, transparent)" }}
+                    title="Wrong room? Remove yourself"
+                  >
+                    {removingId === o.id ? "…" : "✕ Remove"}
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ul>
+      )}
+      {removeError && (
+        <p className="mt-3 text-xs font-semibold" style={{ color: "var(--coral-ink)" }}>⚠️ {removeError}</p>
       )}
       {room.occupants.length < room.capacity && (
         <Link
@@ -93,6 +131,15 @@ export default function Browse() {
       .catch(() => setFloors([]))
       .finally(() => setLoading(false));
   }, [block]);
+
+  async function refresh() {
+    const data = await getRooms(block);
+    setFloors(data.floors);
+    setSelected((current) => {
+      if (!current) return current;
+      return data.floors.flatMap((f) => f.rooms).find((r) => r.room === current.room) || null;
+    });
+  }
 
   const counts = useMemo(() => {
     const all = floors.flatMap((f) => f.rooms);
@@ -159,7 +206,7 @@ export default function Browse() {
 
         <div className="lg:sticky lg:top-24">
           {selected ? (
-            <RoomDetail room={selected} block={block} />
+            <RoomDetail room={selected} block={block} onChanged={refresh} />
           ) : (
             <div className="rounded-2xl p-6 text-sm" style={{ background: "var(--surface-2)", color: "var(--ink-soft)" }}>
               Tap a room number to see who's already in it.

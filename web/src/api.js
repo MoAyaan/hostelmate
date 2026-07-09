@@ -18,3 +18,5 @@ export const getRoom = (block, room) =>
   request(`/room?block=${encodeURIComponent(block)}&room=${encodeURIComponent(room)}`);
 export const addOccupant = (payload) =>
   request("/occupants", { method: "POST", body: JSON.stringify(payload) });
+export const removeOccupant = (id, deleteToken) =>
+  request(`/occupants/${encodeURIComponent(id)}`, { method: "DELETE", body: JSON.stringify({ deleteToken }) });
