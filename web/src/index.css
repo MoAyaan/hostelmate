@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+:root{
+  --bg: #FFF7EC;
+  --surface: #FFFFFF;
+  --surface-2: #FFF1DC;
+  --ink: #211842;
+  --ink-soft: #5B5279;
+  --violet: #6C4CF1;
+  --violet-ink: #2C1A78;
+  --pink: #FF4D8D;
+  --pink-ink: #8A1345;
+  --sky: #2AA9E0;
+  --sky-ink: #0B4C68;
+  --amber: #FFB020;
+  --amber-ink: #6E4400;
+  --coral: #FF5A5F;
+  --coral-ink: #7A1418;
+  --mint: #1FBF8A;
+  --mint-ink: #0A5A3E;
+  --line: rgba(33,24,66,0.14);
+  --line-strong: rgba(33,24,66,0.28);
+  --shadow-card: 0 10px 26px -16px rgba(33,24,66,0.45);
+  --shadow-pop: 0 18px 40px -18px rgba(33,24,66,0.55);
+  --focus: #6C4CF1;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #150E2E;
+    --surface: #201748;
+    --surface-2: #281D57;
+    --ink: #F5F1FF;
+    --ink-soft: #C8BEEA;
+    --violet: #9B85FF;
+    --violet-ink: #EDE7FF;
+    --pink: #FF75AA;
+    --pink-ink: #FFE1EC;
+    --sky: #5BC4EE;
+    --sky-ink: #DEF4FF;
+    --amber: #FFC24D;
+    --amber-ink: #3A2600;
+    --coral: #FF7A7E;
+    --coral-ink: #3A0C0E;
+    --mint: #3DDBA5;
+    --mint-ink: #062E20;
+    --line: rgba(245,241,255,0.14);
+    --line-strong: rgba(245,241,255,0.28);
+    --shadow-card: 0 10px 26px -14px rgba(0,0,0,0.6);
+    --shadow-pop: 0 18px 44px -16px rgba(0,0,0,0.7);
+    --focus: #B7A6FF;
+  }
+}
+:root[data-theme="dark"]{
+  --bg: #150E2E; --surface: #201748; --surface-2: #281D57; --ink: #F5F1FF; --ink-soft: #C8BEEA;
+  --violet: #9B85FF; --violet-ink: #EDE7FF; --pink: #FF75AA; --pink-ink: #FFE1EC;
+  --sky: #5BC4EE; --sky-ink: #DEF4FF; --amber: #FFC24D; --amber-ink: #3A2600;
+  --coral: #FF7A7E; --coral-ink: #3A0C0E; --mint: #3DDBA5; --mint-ink: #062E20;
+  --line: rgba(245,241,255,0.14); --line-strong: rgba(245,241,255,0.28);
+  --shadow-card: 0 10px 26px -14px rgba(0,0,0,0.6); --shadow-pop: 0 18px 44px -16px rgba(0,0,0,0.7);
+  --focus: #B7A6FF;
+}
+:root[data-theme="light"]{
+  --bg: #FFF7EC; --surface: #FFFFFF; --surface-2: #FFF1DC; --ink: #211842; --ink-soft: #5B5279;
+  --violet: #6C4CF1; --violet-ink: #2C1A78; --pink: #FF4D8D; --pink-ink: #8A1345;
+  --sky: #2AA9E0; --sky-ink: #0B4C68; --amber: #FFB020; --amber-ink: #6E4400;
+  --coral: #FF5A5F; --coral-ink: #7A1418; --mint: #1FBF8A; --mint-ink: #0A5A3E;
+  --line: rgba(33,24,66,0.14); --line-strong: rgba(33,24,66,0.28);
+  --shadow-card: 0 10px 26px -16px rgba(33,24,66,0.45); --shadow-pop: 0 18px 40px -18px rgba(33,24,66,0.55);
+  --focus: #6C4CF1;
+}
+
+*{ box-sizing: border-box; }
+html{ scroll-behavior: smooth; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+}
+.font-display{ font-family: 'Baloo 2', 'Arial Rounded MT Bold', sans-serif; }
+.font-mono{ font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+:focus-visible{ outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+::selection{ background: var(--amber); color: var(--violet-ink); }
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+@keyframes blobFloat{ 0%,100%{ transform: translate(0,0) scale(1); } 33%{ transform: translate(18px,-24px) scale(1.06); } 66%{ transform: translate(-14px,14px) scale(0.96); } }
+@keyframes floatY{ 0%,100%{ transform: translateY(0) rotate(var(--rot,0deg)); } 50%{ transform: translateY(-10px) rotate(var(--rot,0deg)); } }
+@keyframes popIn{ 0%{ opacity:0; transform: scale(0.7) translateY(10px);} 60%{ opacity:1; } 100%{ opacity:1; transform:none; } }
+@keyframes riseIn{ from{ opacity:0; transform: translateY(22px);} to{ opacity:1; transform:none; } }
+@keyframes wiggle{ 0%,100%{ transform: rotate(0deg);} 25%{ transform: rotate(-3deg);} 75%{ transform: rotate(3deg);} }
+@keyframes confettiFall{ 0%{ transform: translateY(-10px) rotate(0deg); opacity:1;} 100%{ transform: translateY(120px) rotate(300deg); opacity:0; } }
+@keyframes dash{ to{ stroke-dashoffset: -100; } }
+@keyframes spinSlow{ to{ transform: rotate(360deg); } }
+@keyframes pulseRing{ 0%{ transform: scale(0.7); opacity:.8; } 100%{ transform: scale(2.2); opacity:0; } }
+
+.animate-riseIn{ animation: riseIn .6s cubic-bezier(.2,.8,.2,1) both; }
+.animate-popIn{ animation: popIn .45s cubic-bezier(.2,1.4,.4,1) both; }
