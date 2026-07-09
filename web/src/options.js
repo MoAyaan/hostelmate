@@ -6,6 +6,7 @@ export const BRANCHES = [
   "B.Tech - Mathematics and Computing",
   "B.Tech - Electronics & Communication Engineering",
   "B.Tech - Electronics Engineering",
+  "B.Tech - Robotics and Artificial Intelligence",
   "BBA",
   "BCA",
   "B.Com",

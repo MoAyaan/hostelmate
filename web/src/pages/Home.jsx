@@ -228,8 +228,8 @@ export default function Home() {
                 </div>
                 <div className="mt-5 flex gap-4 text-sm font-bold flex-wrap">
                   <span style={{ color: "var(--ink-soft)" }}>{s?.roomCount ?? 0} rooms logged</span>
-                  <span style={{ color: "var(--amber-ink)" }}>{s?.partial ?? 0} partial</span>
-                  <span style={{ color: "var(--coral-ink)" }}>{s?.full ?? 0} full</span>
+                  <span style={{ color: "var(--amber-label)" }}>{s?.partial ?? 0} partial</span>
+                  <span style={{ color: "var(--coral-label)" }}>{s?.full ?? 0} full</span>
                 </div>
                 <span className="inline-block mt-5 font-bold" style={{ color: accentVar }}>Browse {meta.label} →</span>
               </Link>

@@ -37,8 +37,8 @@ db.exec(`
 `);
 
 export const BLOCKS = {
-  HB1: { label: "HB1", roomType: "Double • Common bath • Non-AC", ac: false, gender: "female", capacities: [2] },
-  HB2: { label: "HB2", roomType: "Double or Triple • details TBD", ac: false, gender: "unspecified", capacities: [2, 3] },
+  HB1: { label: "HB1", roomType: "Double or Triple • Common bath • Non-AC", ac: false, gender: "female", capacities: [2, 3] },
+  HB2: { label: "HB2", roomType: "Double or Triple • details TBD", ac: false, gender: "male", capacities: [2, 3] },
   HB3: { label: "HB3", roomType: "Double • Attached • AC", ac: true, gender: "female", capacities: [2] },
   HB4: { label: "HB4", roomType: "Double • Attached • AC", ac: true, gender: "male", capacities: [2] },
   HB5: { label: "HB5", roomType: "Double • Attached • Non-AC", ac: false, gender: "male", capacities: [2] },
