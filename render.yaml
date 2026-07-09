@@ -21,7 +21,7 @@ services:
         fromService:
           type: web
           name: hostelmate-api
-          property: hostUrl
+          property: host
     routes:
       - type: rewrite
         source: /*
