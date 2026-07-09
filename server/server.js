@@ -244,8 +244,8 @@ app.post("/api/occupants", writeLimiter, async (req, res, next) => {
         [block, parsed.code, capacity]
       );
       const insertResult = await client.query(
-        `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone, branch, home_state, delete_token)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+        `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone, branch, home_state, delete_token, ip_address)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
         [
           block,
           parsed.code,
@@ -258,6 +258,7 @@ app.post("/api/occupants", writeLimiter, async (req, res, next) => {
           clip(branch, LIMITS.freeText),
           clip(homeState, LIMITS.freeText),
           deleteToken,
+          req.ip || null,
         ]
       );
       await client.query("COMMIT");
