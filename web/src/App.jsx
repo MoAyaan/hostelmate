@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { NavLink, Route, Routes } from "react-router-dom";
+import { Link, NavLink, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Browse from "./pages/Browse.jsx";
 import Add from "./pages/Add.jsx";
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener("scroll", onScroll);
@@ -38,14 +40,32 @@ function Nav() {
           <NavLink to="/browse" className={linkClass}>Browse rooms</NavLink>
           <NavLink to="/add" className={linkClass}>Add yourself</NavLink>
         </div>
-        <NavLink
-          to="/add"
-          className="rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_var(--pink-ink)] hover:-translate-y-0.5 transition-transform"
-          style={{ background: "var(--pink)" }}
-        >
-          + Add me
-        </NavLink>
+        <div className="flex items-center gap-2">
+          <NavLink
+            to="/add"
+            className="rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_var(--pink-ink)] hover:-translate-y-0.5 transition-transform"
+            style={{ background: "var(--pink)" }}
+          >
+            + Add me
+          </NavLink>
+          <button
+            type="button"
+            className="sm:hidden w-10 h-10 rounded-full grid place-items-center border-2"
+            style={{ borderColor: "var(--line-strong)" }}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
+        </div>
       </div>
+      {menuOpen && (
+        <div className="sm:hidden flex flex-col gap-4 px-6 pb-5 animate-riseIn" style={{ borderTop: "1px solid var(--line)" }}>
+          <NavLink to="/browse" className={linkClass} onClick={() => setMenuOpen(false)}>Browse rooms</NavLink>
+          <NavLink to="/add" className={linkClass} onClick={() => setMenuOpen(false)}>Add yourself</NavLink>
+        </div>
+      )}
     </nav>
   );
 }
@@ -61,6 +81,26 @@ function Footer() {
   );
 }
 
+function NotFound() {
+  return (
+    <div className="max-w-xl mx-auto px-6 py-24 text-center">
+      <span className="text-5xl inline-block animate-popIn">🧭</span>
+      <h1 className="font-display text-3xl mt-4 animate-riseIn">Wrong door.</h1>
+      <p className="mt-3 animate-riseIn" style={{ color: "var(--ink-soft)", animationDelay: ".1s" }}>
+        That page doesn't exist — but your room might. Try Browse or Home instead.
+      </p>
+      <div className="mt-8 flex flex-wrap justify-center gap-3 animate-riseIn" style={{ animationDelay: ".2s" }}>
+        <Link to="/" className="rounded-full px-6 py-3 font-bold text-white" style={{ background: "var(--violet)" }}>
+          Go home →
+        </Link>
+        <Link to="/browse" className="rounded-full px-6 py-3 font-bold border-2" style={{ borderColor: "var(--line-strong)", color: "var(--ink)" }}>
+          Browse rooms
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -70,6 +110,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/add" element={<Add />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer />

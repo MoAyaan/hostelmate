@@ -1,11 +1,29 @@
 import express from "express";
 import cors from "cors";
 import crypto from "node:crypto";
+import rateLimit from "express-rate-limit";
 import { db, BLOCKS, parseRoomCode } from "./db.js";
 
 const app = express();
+app.set("trust proxy", 1); // Render sits behind a proxy; needed so rate limiting sees the real client IP
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "20kb" }));
+
+const LIMITS = { name: 80, handle: 60, phone: 30, freeText: 100 };
+
+function clip(value, max) {
+  if (!value) return null;
+  const trimmed = String(value).trim();
+  return trimmed ? trimmed.slice(0, max) : null;
+}
+
+const writeLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts from this connection — wait a bit and try again." },
+});
 
 function statusFor(count, capacity) {
   if (count >= capacity) return "full";
@@ -140,7 +158,7 @@ app.get("/api/room", (req, res) => {
 });
 
 // POST /api/occupants — add yourself to a room
-app.post("/api/occupants", (req, res) => {
+app.post("/api/occupants", writeLimiter, (req, res) => {
   const { block: blockRaw, room: roomRaw, roomCapacity, name, reddit, instagram, discord, phone, branch, homeState } = req.body || {};
   const block = String(blockRaw || "").toUpperCase();
 
@@ -211,13 +229,13 @@ app.post("/api/occupants", (req, res) => {
       block,
       room: parsed.code,
       floor: parsed.floor,
-      name: String(name).trim(),
-      reddit: reddit ? String(reddit).trim() : null,
-      instagram: instagram ? String(instagram).trim() : null,
-      discord: discord ? String(discord).trim() : null,
-      phone: phone ? String(phone).trim() : null,
-      branch: branch ? String(branch).trim() : null,
-      homeState: homeState ? String(homeState).trim() : null,
+      name: clip(name, LIMITS.name),
+      reddit: clip(reddit, LIMITS.handle),
+      instagram: clip(instagram, LIMITS.handle),
+      discord: clip(discord, LIMITS.handle),
+      phone: clip(phone, LIMITS.phone),
+      branch: clip(branch, LIMITS.freeText),
+      homeState: clip(homeState, LIMITS.freeText),
       deleteToken,
     });
   })();
@@ -233,9 +251,13 @@ app.post("/api/occupants", (req, res) => {
 });
 
 // DELETE /api/occupants/:id — remove yourself (e.g. picked the wrong room)
-app.delete("/api/occupants/:id", (req, res) => {
+app.delete("/api/occupants/:id", writeLimiter, (req, res) => {
   const id = Number(req.params.id);
   const { deleteToken } = req.body || {};
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ error: "That's not a valid entry." });
+  }
 
   const row = db.prepare(`SELECT id, delete_token FROM occupants WHERE id = ?`).get(id);
   if (!row) return res.status(404).json({ error: "That entry is already gone." });
@@ -245,6 +267,17 @@ app.delete("/api/occupants/:id", (req, res) => {
 
   db.prepare(`DELETE FROM occupants WHERE id = ?`).run(id);
   res.json({ ok: true });
+});
+
+// Unknown API routes
+app.use("/api", (req, res) => {
+  res.status(404).json({ error: "Not found." });
+});
+
+// Never leak stack traces to clients
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: "Something went wrong on our end. Try again in a moment." });
 });
 
 const PORT = process.env.PORT || 8790;

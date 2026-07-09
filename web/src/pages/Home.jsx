@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { getBlocks, getRoom } from "../api.js";
 import { BLOCKS, GENDER_META } from "../blocks.js";
 
@@ -39,7 +39,6 @@ export default function Home() {
   const [quickRoom, setQuickRoom] = useState("");
   const [quickResult, setQuickResult] = useState(null);
   const [quickError, setQuickError] = useState("");
-  const navigate = useNavigate();
 
   useEffect(() => {
     getBlocks().then(setSummary).catch(() => {});
@@ -123,8 +122,9 @@ export default function Home() {
             style={{ background: "var(--surface)", boxShadow: "var(--shadow-pop)" }}
           >
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>Block</label>
+              <label htmlFor="quick-block" className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>Block</label>
               <select
+                id="quick-block"
                 value={quickBlock}
                 onChange={(e) => setQuickBlock(e.target.value)}
                 className="rounded-lg px-3 py-2 border-2 font-mono"
@@ -136,11 +136,14 @@ export default function Home() {
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>Room no.</label>
+              <label htmlFor="quick-room" className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>Room no.</label>
               <input
+                id="quick-room"
                 value={quickRoom}
-                onChange={(e) => setQuickRoom(e.target.value)}
+                onChange={(e) => setQuickRoom(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 placeholder="e.g. 710"
+                inputMode="numeric"
+                maxLength={6}
                 className="rounded-lg px-3 py-2 border-2 font-mono w-32"
                 style={{ borderColor: "var(--line-strong)", background: "var(--bg)" }}
               />

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { getRooms, removeOccupant } from "../api.js";
 import { BLOCKS, STATUS_META } from "../blocks.js";
@@ -10,7 +10,9 @@ function RoomTag({ room, onSelect, isSelected }) {
   const filled = room.status !== "empty";
   return (
     <button
+      type="button"
       onClick={() => onSelect(room)}
+      aria-pressed={isSelected}
       className="relative rounded-xl px-3 py-3 font-mono font-bold text-sm transition-all hover:-translate-y-1 hover:shadow-lg"
       style={{
         background: filled ? bg : "var(--surface)",
@@ -24,6 +26,7 @@ function RoomTag({ room, onSelect, isSelected }) {
       {room.room}
       {room.status === "partial" && (
         <span
+          aria-hidden="true"
           className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full"
           style={{ background: "var(--amber)", boxShadow: "0 0 0 2px var(--surface)", animation: "pulseRing 1.8s ease-out infinite" }}
         />
@@ -126,24 +129,47 @@ export default function Browse() {
   const [block, setBlock] = useState(location.state?.block || "HB4");
   const [floors, setFloors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selected, setSelected] = useState(null);
+  const requestId = useRef(0);
+
+  function load(resetSelection) {
+    const thisRequest = ++requestId.current;
+    setLoading(true);
+    setLoadError(false);
+    if (resetSelection) setSelected(null);
+    getRooms(block)
+      .then((data) => {
+        if (thisRequest !== requestId.current) return; // a newer block switch already superseded this response
+        setFloors(data.floors);
+      })
+      .catch(() => {
+        if (thisRequest !== requestId.current) return;
+        setFloors([]);
+        setLoadError(true);
+      })
+      .finally(() => {
+        if (thisRequest !== requestId.current) return;
+        setLoading(false);
+      });
+  }
 
   useEffect(() => {
-    setLoading(true);
-    setSelected(null);
-    getRooms(block)
-      .then((data) => setFloors(data.floors))
-      .catch(() => setFloors([]))
-      .finally(() => setLoading(false));
+    load(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [block]);
 
   async function refresh() {
-    const data = await getRooms(block);
-    setFloors(data.floors);
-    setSelected((current) => {
-      if (!current) return current;
-      return data.floors.flatMap((f) => f.rooms).find((r) => r.room === current.room) || null;
-    });
+    try {
+      const data = await getRooms(block);
+      setFloors(data.floors);
+      setSelected((current) => {
+        if (!current) return current;
+        return data.floors.flatMap((f) => f.rooms).find((r) => r.room === current.room) || null;
+      });
+    } catch {
+      // leave the current view as-is; the room action itself already succeeded or reported its own error
+    }
   }
 
   const counts = useMemo(() => {
@@ -164,7 +190,9 @@ export default function Browse() {
         {Object.entries(BLOCKS).map(([key, meta]) => (
           <button
             key={key}
+            type="button"
             onClick={() => setBlock(key)}
+            aria-pressed={block === key}
             className="rounded-full px-5 py-2.5 font-bold border-2 transition-all"
             style={{
               background: block === key ? "var(--ink)" : "transparent",
@@ -186,7 +214,21 @@ export default function Browse() {
       <div className="mt-8 grid lg:grid-cols-[1fr_320px] gap-8 items-start">
         <div>
           {loading && <p style={{ color: "var(--ink-soft)" }}>Loading…</p>}
-          {!loading && floors.length === 0 && (
+          {!loading && loadError && (
+            <div className="rounded-2xl p-8 text-center" style={{ background: "var(--surface)", boxShadow: "var(--shadow-card)" }}>
+              <p className="text-lg font-bold">Couldn't load {block} right now.</p>
+              <p className="mt-1" style={{ color: "var(--ink-soft)" }}>The server might be waking up — try again in a few seconds.</p>
+              <button
+                type="button"
+                onClick={() => load(false)}
+                className="inline-block mt-4 rounded-full px-5 py-2.5 font-bold text-white"
+                style={{ background: "var(--violet)" }}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+          {!loading && !loadError && floors.length === 0 && (
             <div className="rounded-2xl p-8 text-center" style={{ background: "var(--surface)", boxShadow: "var(--shadow-card)" }}>
               <p className="text-lg font-bold">No rooms logged in {block} yet.</p>
               <p className="mt-1" style={{ color: "var(--ink-soft)" }}>Be the first to add your room number.</p>

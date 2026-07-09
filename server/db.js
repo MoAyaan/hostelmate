@@ -45,11 +45,14 @@ export const BLOCKS = {
 };
 
 // "710" -> { floor: "7", roomOnFloor: "10" }; "1205" -> { floor: "12", roomOnFloor: "05" }
+// "0710" normalizes the same as "710" so leading zeros can't split one physical room into two records.
 export function parseRoomCode(raw) {
-  const code = String(raw).trim();
-  if (!/^\d{3,}$/.test(code)) return null;
-  const roomOnFloor = code.slice(-2);
-  const floor = code.slice(0, -2);
-  if (!floor) return null;
+  const trimmed = String(raw).trim();
+  if (!/^\d{3,}$/.test(trimmed)) return null;
+  const roomOnFloor = trimmed.slice(-2);
+  const floorRaw = trimmed.slice(0, -2);
+  if (!floorRaw) return null;
+  const floor = String(Number(floorRaw));
+  const code = floor + roomOnFloor;
   return { floor, roomOnFloor, code };
 }

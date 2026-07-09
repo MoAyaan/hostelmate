@@ -9,7 +9,12 @@ function readAll() {
 }
 
 function writeAll(entries) {
-  localStorage.setItem(KEY, JSON.stringify(entries));
+  try {
+    localStorage.setItem(KEY, JSON.stringify(entries));
+  } catch {
+    // storage disabled/full (e.g. private browsing) — the room was still added server-side,
+    // the person just won't see a "Remove" button for it later on this device.
+  }
 }
 
 export function rememberEntry(entry) {
