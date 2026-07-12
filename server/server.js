@@ -171,6 +171,28 @@ app.get("/api/room", async (req, res, next) => {
   }
 });
 
+// GET /api/recent?limit=8 — most recently added rooms, for a "who just joined" feed
+app.get("/api/recent", async (req, res, next) => {
+  try {
+    const limit = Math.min(Math.max(Number(req.query.limit) || 8, 1), 20);
+    const { rows } = await pool.query(
+      `SELECT id, block, room, name, created_at FROM occupants ORDER BY created_at DESC LIMIT $1`,
+      [limit]
+    );
+    res.json({
+      recent: rows.map((r) => ({
+        id: r.id,
+        block: r.block,
+        room: r.room,
+        name: r.name,
+        createdAt: r.created_at,
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /api/occupants — add yourself to a room
 app.post("/api/occupants", writeLimiter, async (req, res, next) => {
   try {

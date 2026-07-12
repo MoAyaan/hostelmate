@@ -13,6 +13,7 @@ async function request(path, options) {
 }
 
 export const getBlocks = () => request("/blocks");
+export const getRecent = (limit) => request(`/recent${limit ? `?limit=${limit}` : ""}`);
 export const getRooms = (block) => request(`/rooms?block=${encodeURIComponent(block)}`);
 export const getRoom = (block, room) =>
   request(`/room?block=${encodeURIComponent(block)}&room=${encodeURIComponent(room)}`);

@@ -1,7 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getBlocks, getRoom } from "../api.js";
+import { getBlocks, getRoom, getRecent } from "../api.js";
 import { BLOCKS, GENDER_META } from "../blocks.js";
+
+function timeAgo(iso) {
+  const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (sec < 60) return "just now";
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 7) return `${day}d ago`;
+  return `${Math.floor(day / 7)}w ago`;
+}
 
 function Blob({ className, color, style }) {
   return (
@@ -35,6 +47,7 @@ function StatCard({ value, label, delay }) {
 
 export default function Home() {
   const [summary, setSummary] = useState(null);
+  const [recent, setRecent] = useState(null);
   const [quickBlock, setQuickBlock] = useState("HB4");
   const [quickRoom, setQuickRoom] = useState("");
   const [quickResult, setQuickResult] = useState(null);
@@ -42,6 +55,7 @@ export default function Home() {
 
   useEffect(() => {
     getBlocks().then(setSummary).catch(() => {});
+    getRecent(6).then((data) => setRecent(data.recent)).catch(() => {});
   }, []);
 
   const totals = summary
@@ -184,6 +198,51 @@ export default function Home() {
           <StatCard value={totals.full} label="fully matched" delay={200} />
         </div>
       </section>
+
+      {/* RECENTLY ADDED */}
+      {recent && recent.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 mb-16">
+          <div className="flex items-center gap-2">
+            <span
+              className="w-2.5 h-2.5 rounded-full inline-block relative"
+              style={{ background: "var(--mint)", boxShadow: "var(--mint-glow)" }}
+            >
+              <span
+                className="absolute inset-0 rounded-full"
+                style={{ background: "var(--mint)", animation: "pulseRing 1.8s ease-out infinite" }}
+              />
+            </span>
+            <h2 className="font-display text-2xl">Just added</h2>
+          </div>
+          <p className="mt-1 text-sm" style={{ color: "var(--ink-soft)" }}>The latest rooms filled in — freshest first.</p>
+          <div className="mt-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {recent.map((r, i) => {
+              const meta = BLOCKS[r.block];
+              const accentVar = meta ? `var(--${meta.accent})` : "var(--violet)";
+              return (
+                <Link
+                  key={r.id}
+                  to="/browse"
+                  state={{ block: r.block }}
+                  className="rounded-2xl p-4 flex items-center gap-3 animate-riseIn transition-transform hover:-translate-y-0.5"
+                  style={{ background: "var(--surface)", boxShadow: "var(--shadow-card)", animationDelay: `${i * 0.06}s` }}
+                >
+                  <span
+                    className="w-10 h-10 shrink-0 rounded-xl grid place-items-center font-display text-sm"
+                    style={{ background: accentVar, color: "white" }}
+                  >
+                    {r.block}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm truncate">{r.name} → Room {r.room}</p>
+                    <p className="text-xs" style={{ color: "var(--ink-soft)" }}>{timeAgo(r.createdAt)}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* BLOCKS */}
       <section className="max-w-6xl mx-auto px-6 py-10">
