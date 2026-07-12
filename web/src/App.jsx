@@ -3,6 +3,8 @@ import { Link, NavLink, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Browse from "./pages/Browse.jsx";
 import Add from "./pages/Add.jsx";
+import Guide from "./pages/Guide.jsx";
+import Checklist from "./pages/Checklist.jsx";
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -36,9 +38,11 @@ function Nav() {
           </span>
           HostelMate
         </NavLink>
-        <div className="hidden sm:flex items-center gap-7">
+        <div className="hidden sm:flex items-center gap-6">
           <NavLink to="/browse" className={linkClass}>Browse rooms</NavLink>
           <NavLink to="/add" className={linkClass}>Add yourself</NavLink>
+          <NavLink to="/guide" className={linkClass}>Guide</NavLink>
+          <NavLink to="/checklist" className={linkClass}>Checklist</NavLink>
         </div>
         <div className="flex items-center gap-2">
           <NavLink
@@ -64,6 +68,8 @@ function Nav() {
         <div className="sm:hidden flex flex-col gap-4 px-6 pb-5 animate-riseIn" style={{ borderTop: "1px solid var(--line)" }}>
           <NavLink to="/browse" className={linkClass} onClick={() => setMenuOpen(false)}>Browse rooms</NavLink>
           <NavLink to="/add" className={linkClass} onClick={() => setMenuOpen(false)}>Add yourself</NavLink>
+          <NavLink to="/guide" className={linkClass} onClick={() => setMenuOpen(false)}>Guide</NavLink>
+          <NavLink to="/checklist" className={linkClass} onClick={() => setMenuOpen(false)}>Checklist</NavLink>
         </div>
       )}
     </nav>
@@ -110,6 +116,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/add" element={<Add />} />
+          <Route path="/guide" element={<Guide />} />
+          <Route path="/checklist" element={<Checklist />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
