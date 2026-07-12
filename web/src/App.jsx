@@ -5,6 +5,7 @@ import Browse from "./pages/Browse.jsx";
 import Add from "./pages/Add.jsx";
 import Guide from "./pages/Guide.jsx";
 import Checklist from "./pages/Checklist.jsx";
+import Stay from "./pages/Stay.jsx";
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -38,11 +39,12 @@ function Nav() {
           </span>
           HostelMate
         </NavLink>
-        <div className="hidden sm:flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-5">
           <NavLink to="/browse" className={linkClass}>Browse rooms</NavLink>
           <NavLink to="/add" className={linkClass}>Add yourself</NavLink>
           <NavLink to="/guide" className={linkClass}>Guide</NavLink>
           <NavLink to="/checklist" className={linkClass}>Checklist</NavLink>
+          <NavLink to="/stay" className={linkClass}>Parent Stay</NavLink>
         </div>
         <div className="flex items-center gap-2">
           <NavLink
@@ -54,7 +56,7 @@ function Nav() {
           </NavLink>
           <button
             type="button"
-            className="sm:hidden w-10 h-10 rounded-full grid place-items-center border-2"
+            className="lg:hidden w-10 h-10 rounded-full grid place-items-center border-2"
             style={{ borderColor: "var(--line-strong)" }}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
@@ -65,11 +67,12 @@ function Nav() {
         </div>
       </div>
       {menuOpen && (
-        <div className="sm:hidden flex flex-col gap-4 px-6 pb-5 animate-riseIn" style={{ borderTop: "1px solid var(--line)" }}>
+        <div className="lg:hidden flex flex-col gap-4 px-6 pb-5 animate-riseIn" style={{ borderTop: "1px solid var(--line)" }}>
           <NavLink to="/browse" className={linkClass} onClick={() => setMenuOpen(false)}>Browse rooms</NavLink>
           <NavLink to="/add" className={linkClass} onClick={() => setMenuOpen(false)}>Add yourself</NavLink>
           <NavLink to="/guide" className={linkClass} onClick={() => setMenuOpen(false)}>Guide</NavLink>
           <NavLink to="/checklist" className={linkClass} onClick={() => setMenuOpen(false)}>Checklist</NavLink>
+          <NavLink to="/stay" className={linkClass} onClick={() => setMenuOpen(false)}>Parent Stay</NavLink>
         </div>
       )}
     </nav>
@@ -118,6 +121,7 @@ export default function App() {
           <Route path="/add" element={<Add />} />
           <Route path="/guide" element={<Guide />} />
           <Route path="/checklist" element={<Checklist />} />
+          <Route path="/stay" element={<Stay />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
