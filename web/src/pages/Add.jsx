@@ -113,6 +113,9 @@ export default function Add() {
   }
 
   if (status === "done") {
+    const shareText = `I just added myself to HostelMate for room ${form.room} in ${form.block} 🏠 Add yourself too so we all know who's on our floor before move-in day: ${window.location.origin}/add`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
     return (
       <div className="max-w-xl mx-auto px-6 py-24 text-center relative">
         <Confetti />
@@ -121,7 +124,21 @@ export default function Add() {
         <p className="mt-3 animate-riseIn" style={{ color: "var(--ink-soft)", animationDelay: ".1s" }}>
           Room {form.room} in {form.block} now knows you're coming. Check the browse page to see it live.
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3 animate-riseIn" style={{ animationDelay: ".2s" }}>
+
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-bold text-white shadow-[0_4px_0_rgba(0,80,44,0.6)] hover:-translate-y-0.5 transition-transform animate-popIn"
+          style={{ background: "#25D366" }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12.04 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.9-4.44 9.9-9.9 0-2.64-1.03-5.13-2.9-6.99A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.24 8.24 0 0 1-1.26-4.4c0-4.55 3.7-8.25 8.26-8.25a8.2 8.2 0 0 1 5.84 2.42 8.19 8.19 0 0 1 2.42 5.84c0 4.55-3.71 8.25-8.27 8.25zm4.53-6.19c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.25-.64.81-.78.97-.15.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43-.14-.01-.31-.01-.48-.01a.92.92 0 0 0-.67.31c-.23.25-.87.85-.87 2.08s.9 2.42 1.02 2.58c.13.17 1.77 2.7 4.28 3.79.6.26 1.06.41 1.43.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/>
+          </svg>
+          Share on WhatsApp
+        </a>
+
+        <div className="mt-4 flex flex-wrap justify-center gap-3 animate-riseIn" style={{ animationDelay: ".2s" }}>
           <Link to="/browse" state={{ block: form.block }} className="rounded-full px-6 py-3 font-bold text-white" style={{ background: "var(--violet)" }}>
             View {form.block} rooms →
           </Link>
