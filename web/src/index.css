@@ -115,3 +115,6 @@ body{
 
 .animate-riseIn{ animation: riseIn .6s cubic-bezier(.2,.8,.2,1) both; }
 .animate-popIn{ animation: popIn .45s cubic-bezier(.2,1.4,.4,1) both; }
+
+.glow-card{ transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease; }
+.glow-card:hover, .glow-card:focus-within{ transform: translateY(-5px); box-shadow: var(--hover-glow); }

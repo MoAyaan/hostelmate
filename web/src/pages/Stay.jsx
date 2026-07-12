@@ -1,3 +1,35 @@
+import { useEffect, useRef, useState } from "react";
+
+function Blob({ className, color, delay }) {
+  return (
+    <div
+      className={`absolute rounded-full blur-3xl opacity-30 pointer-events-none ${className}`}
+      style={{ background: color, animation: "blobFloat 9s ease-in-out infinite", animationDelay: delay }}
+    />
+  );
+}
+
+function useReveal() {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.unobserve(el);
+        }
+      },
+      { threshold: 0.12 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return [ref, visible];
+}
+
 const CAMPUS = "Manipal Academy of Higher Education, Bengaluru Campus, Govindapura, Yelahanka, Bengaluru 560063";
 
 function directionsUrl(destination) {
@@ -151,48 +183,78 @@ const HOTELS = [
   },
 ];
 
+function HotelCard({ h, delay }) {
+  const [ref, visible] = useReveal();
+  return (
+    <div
+      ref={ref}
+      className="glow-card rounded-2xl p-6 relative overflow-hidden transition-all duration-700"
+      style={{
+        background: "var(--surface)",
+        boxShadow: "var(--shadow-card)",
+        "--hover-glow": `0 0 22px 3px color-mix(in srgb, var(--${h.accent}) 55%, transparent), 0 0 46px 10px color-mix(in srgb, var(--${h.accent}) 28%, transparent), var(--shadow-pop)`,
+        opacity: visible ? 1 : 0,
+        transform: visible ? "none" : "translateY(28px)",
+        transitionDelay: visible ? delay : "0s",
+      }}
+    >
+      <div
+        className="absolute -right-8 -top-8 w-24 h-24 rounded-full opacity-20"
+        style={{ background: `var(--${h.accent})`, animation: visible ? "blobFloat 7s ease-in-out infinite" : "none" }}
+      />
+      <div className="relative">
+        <h2 className="font-display text-xl leading-tight">{h.name}</h2>
+        <p className="text-xs mt-1" style={{ color: "var(--ink-soft)" }}>📍 {h.area}</p>
+        {h.rating && (
+          <span
+            className="inline-block mt-2 text-xs font-extrabold rounded-full px-2.5 py-1"
+            style={{
+              background: `color-mix(in srgb, var(--${h.accent}) 20%, transparent)`,
+              color: `var(--${h.accent}-ink)`,
+              boxShadow: `0 0 9px 1px color-mix(in srgb, var(--${h.accent}) 40%, transparent)`,
+            }}
+          >
+            ★ {h.rating}
+          </span>
+        )}
+        <p className="text-sm mt-3" style={{ color: "var(--ink-soft)" }}>{h.blurb}</p>
+        <div className="mt-4 flex items-center justify-end">
+          <a
+            href={directionsUrl(h.mapQuery)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-full px-4 py-2 text-xs font-bold text-white transition-all hover:-translate-y-0.5"
+            style={{ background: "var(--violet)", boxShadow: "0 3px 0 var(--violet-ink)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 3px 0 var(--violet-ink), 0 0 16px 2px color-mix(in srgb, var(--violet) 60%, transparent)")}
+            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 3px 0 var(--violet-ink)")}
+          >
+            Directions →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Stay() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
-      <span className="text-4xl inline-block animate-popIn">🏨</span>
-      <h1 className="font-display text-3xl mt-3 animate-riseIn">Where Parents Can Stay</h1>
-      <p className="mt-2 animate-riseIn max-w-2xl" style={{ color: "var(--ink-soft)", animationDelay: ".08s" }}>
-        Hotels, resorts and homestays in the Yelahanka/Jakkur area, near campus, for move-in day or visiting weekends. Ratings are pulled from booking sites and change often, and vary a lot between platforms — tap through to confirm current details before booking.
-      </p>
+      <div className="relative overflow-hidden -mx-6 px-6 pb-2">
+        <Blob className="w-72 h-72 -top-16 -left-10" color="var(--violet)" delay="0s" />
+        <Blob className="w-64 h-64 -top-8 right-0" color="var(--mint)" delay="2.5s" />
+        <Blob className="w-56 h-56 top-24 left-1/3" color="var(--amber)" delay="5s" />
+        <div className="relative">
+          <span className="text-4xl inline-block" style={{ animation: "popIn .45s cubic-bezier(.2,1.4,.4,1) both, floatY 4.5s ease-in-out 1s infinite" }}>🏨</span>
+          <h1 className="font-display text-3xl mt-3 animate-riseIn">Where Parents Can Stay</h1>
+          <p className="mt-2 animate-riseIn max-w-2xl" style={{ color: "var(--ink-soft)", animationDelay: ".08s" }}>
+            Hotels, resorts and homestays in the Yelahanka/Jakkur area, near campus, for move-in day or visiting weekends. Ratings are pulled from booking sites and change often, and vary a lot between platforms — tap through to confirm current details before booking.
+          </p>
+        </div>
+      </div>
 
       <div className="mt-8 grid sm:grid-cols-2 gap-6">
         {HOTELS.map((h, i) => (
-          <div
-            key={h.name}
-            className="rounded-2xl p-6 relative overflow-hidden animate-riseIn"
-            style={{ background: "var(--surface)", boxShadow: "var(--shadow-card)", animationDelay: `${i * 0.05}s` }}
-          >
-            <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full opacity-20" style={{ background: `var(--${h.accent})` }} />
-            <div className="relative">
-              <h2 className="font-display text-xl leading-tight">{h.name}</h2>
-              <p className="text-xs mt-1" style={{ color: "var(--ink-soft)" }}>📍 {h.area}</p>
-              {h.rating && (
-                <span
-                  className="inline-block mt-2 text-xs font-extrabold rounded-full px-2.5 py-1"
-                  style={{ background: `color-mix(in srgb, var(--${h.accent}) 20%, transparent)`, color: `var(--${h.accent}-ink)` }}
-                >
-                  ★ {h.rating}
-                </span>
-              )}
-              <p className="text-sm mt-3" style={{ color: "var(--ink-soft)" }}>{h.blurb}</p>
-              <div className="mt-4 flex items-center justify-end">
-                <a
-                  href={directionsUrl(h.mapQuery)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0 rounded-full px-4 py-2 text-xs font-bold text-white transition-transform hover:-translate-y-0.5"
-                  style={{ background: "var(--violet)", boxShadow: "0 3px 0 var(--violet-ink)" }}
-                >
-                  Directions →
-                </a>
-              </div>
-            </div>
-          </div>
+          <HotelCard key={h.name} h={h} delay={`${(i % 6) * 0.08}s`} />
         ))}
       </div>
 
