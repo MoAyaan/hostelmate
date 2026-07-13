@@ -219,7 +219,12 @@ function Footer() {
           <span className="font-display">HostelMate — MIT Bangalore</span>
           <span>Built by hostellers, for hostellers. Not an official MIT Bangalore service.</span>
         </div>
-        <p className="text-xs">Found a bug or have a suggestion? 9845413074</p>
+        <div
+          className="inline-flex w-fit rounded-lg px-3 py-2 text-xs"
+          style={{ background: "var(--surface-2)", color: "var(--ink-soft)" }}
+        >
+          Found a bug or have a suggestion? Ayaan · HB5, Room 710 · 9845413074
+        </div>
       </div>
     </footer>
   );
