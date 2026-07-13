@@ -309,7 +309,7 @@ export default function Add() {
         </div>
 
         <div className="rounded-xl p-4" style={{ background: "var(--surface-2)" }}>
-          <p className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>🧬 Roommate vibe (optional)</p>
+          <p className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>Roommate vibe (optional)</p>
           <p className="text-xs mt-1" style={{ color: "var(--ink-soft)" }}>Answer a few to show roommates a quick compatibility read — not a hard filter.</p>
           <div className="grid sm:grid-cols-2 gap-3 mt-3">
             {QUIZ_FIELDS.map((field) => (
@@ -323,7 +323,7 @@ export default function Add() {
                 >
                   <option value="">Skip</option>
                   {field.options.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.emoji} {opt.label}</option>
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>

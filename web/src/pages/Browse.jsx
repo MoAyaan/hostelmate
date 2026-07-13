@@ -12,7 +12,7 @@ const QUIZ_LOOKUP = Object.fromEntries(
 function quizTags(o) {
   return QUIZ_FIELDS.map((f) => o[f.key] && QUIZ_LOOKUP[f.key][o[f.key]])
     .filter(Boolean)
-    .map((opt) => `${opt.emoji} ${opt.label}`)
+    .map((opt) => opt.label)
     .join(" · ");
 }
 
@@ -115,7 +115,7 @@ function RoomDetail({ room, block, onChanged }) {
             boxShadow: `0 0 9px 1px color-mix(in srgb, var(--${vibeTone}) 40%, transparent)`,
           }}
         >
-          🧬 {vibeMatch}% vibe match
+          {vibeMatch}% vibe match
         </p>
       )}
       {room.occupants.length === 0 ? (

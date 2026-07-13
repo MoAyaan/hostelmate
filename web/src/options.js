@@ -60,45 +60,45 @@ export const OTHER = "__other__";
 
 // Optional roommate-vibe quiz — shown to give people a quick compatibility read, not a hard filter.
 export const SLEEP_SCHEDULES = [
-  { value: "early_bird", label: "Early bird", emoji: "🌅" },
-  { value: "night_owl", label: "Night owl", emoji: "🌙" },
-  { value: "flexible", label: "Flexible", emoji: "🔄" },
+  { value: "early_bird", label: "Early bird" },
+  { value: "night_owl", label: "Night owl" },
+  { value: "flexible", label: "Flexible" },
 ];
 
 export const TIDINESS_LEVELS = [
-  { value: "very_tidy", label: "Very tidy", emoji: "🧹" },
-  { value: "average", label: "Average", emoji: "🙂" },
-  { value: "relaxed", label: "Relaxed about mess", emoji: "🌀" },
+  { value: "very_tidy", label: "Very tidy" },
+  { value: "average", label: "Average" },
+  { value: "relaxed", label: "Relaxed about mess" },
 ];
 
 export const NOISE_PREFS = [
-  { value: "need_quiet", label: "Need it quiet to focus", emoji: "🤫" },
-  { value: "some_noise_ok", label: "Some noise is fine", emoji: "🎧" },
-  { value: "dont_mind", label: "Doesn't bother me", emoji: "📢" },
+  { value: "need_quiet", label: "Need it quiet to focus" },
+  { value: "some_noise_ok", label: "Some noise is fine" },
+  { value: "dont_mind", label: "Doesn't bother me" },
 ];
 
 export const SOCIAL_STYLES = [
-  { value: "loves_guests", label: "Love having friends over", emoji: "🎉" },
-  { value: "occasional_guests", label: "Occasional guests", emoji: "🙋" },
-  { value: "prefers_privacy", label: "Prefer privacy", emoji: "🚪" },
+  { value: "loves_guests", label: "Love having friends over" },
+  { value: "occasional_guests", label: "Occasional guests" },
+  { value: "prefers_privacy", label: "Prefer privacy" },
 ];
 
 export const SMOKING_PREFS = [
-  { value: "smoker", label: "Smoker", emoji: "🚬" },
-  { value: "non_smoker", label: "Non-smoker", emoji: "🚭" },
-  { value: "okay_either_way", label: "Okay either way", emoji: "😌" },
+  { value: "smoker", label: "Smoker" },
+  { value: "non_smoker", label: "Non-smoker" },
+  { value: "okay_either_way", label: "Okay either way" },
 ];
 
 export const ALCOHOL_PREFS = [
-  { value: "drinks", label: "Drinks socially", emoji: "🍺" },
-  { value: "doesnt_drink", label: "Doesn't drink", emoji: "🚫" },
-  { value: "no_preference", label: "No preference", emoji: "😌" },
+  { value: "drinks", label: "Drinks socially" },
+  { value: "doesnt_drink", label: "Doesn't drink" },
+  { value: "no_preference", label: "No preference" },
 ];
 
 export const SHARING_PREFS = [
-  { value: "happy_to_share", label: "Happy to share toiletries etc.", emoji: "🤝" },
-  { value: "keep_separate", label: "Prefer to keep things separate", emoji: "🧴" },
-  { value: "occasional_sharing", label: "Occasional sharing is fine", emoji: "😌" },
+  { value: "happy_to_share", label: "Happy to share toiletries etc." },
+  { value: "keep_separate", label: "Prefer to keep things separate" },
+  { value: "occasional_sharing", label: "Occasional sharing is fine" },
 ];
 
 export const QUIZ_FIELDS = [
