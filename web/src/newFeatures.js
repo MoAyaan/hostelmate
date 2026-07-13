@@ -1,6 +1,6 @@
 // Bump FEATURES_VERSION whenever there's a new batch of features worth announcing —
 // that's what makes the banner reappear for everyone, even people who dismissed an earlier version.
-export const FEATURES_VERSION = "2026-07-13b";
+export const FEATURES_VERSION = "2026-07-13c";
 
 export const FEATURES = [
   { text: "Roommate vibe quiz — sleep schedule, tidiness, smoking, alcohol, and more", to: "/add" },
