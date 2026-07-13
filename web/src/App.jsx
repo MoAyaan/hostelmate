@@ -6,6 +6,67 @@ import Add from "./pages/Add.jsx";
 import Guide from "./pages/Guide.jsx";
 import Checklist from "./pages/Checklist.jsx";
 import Stay from "./pages/Stay.jsx";
+import { getRoom } from "./api.js";
+import { getAllEntries } from "./myEntries.js";
+import { wasNotified, markNotified } from "./roomAlerts.js";
+
+function RoomFullBanner() {
+  const [alert, setAlert] = useState(null);
+
+  useEffect(() => {
+    const entries = getAllEntries();
+    if (entries.length === 0) return;
+
+    const uniqueRooms = [...new Map(entries.map((e) => [`${e.block}-${e.room}`, e])).values()];
+    let cancelled = false;
+
+    (async () => {
+      for (const e of uniqueRooms) {
+        const key = `${e.block}-${e.room}`;
+        if (wasNotified(key)) continue;
+        try {
+          const data = await getRoom(e.block, e.room);
+          if (data.status === "full") {
+            if (!cancelled) setAlert({ block: e.block, room: e.room, key });
+            break;
+          }
+        } catch {
+          // ignore lookup failures — just skip this room for now
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!alert) return null;
+
+  return (
+    <div
+      className="animate-riseIn"
+      style={{ background: "var(--mint)", boxShadow: "var(--mint-glow)" }}
+    >
+      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-sm font-bold" style={{ color: "var(--mint-ink)" }}>
+          🎉 Room {alert.room} in {alert.block} is now full — everyone's found their roomie!
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            markNotified(alert.key);
+            setAlert(null);
+          }}
+          className="rounded-full px-3 py-1 text-xs font-extrabold shrink-0"
+          style={{ background: "color-mix(in srgb, var(--mint-ink) 15%, transparent)", color: "var(--mint-ink)" }}
+        >
+          Dismiss ✕
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -113,6 +174,7 @@ function NotFound() {
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
+      <RoomFullBanner />
       <Nav />
       <main className="flex-1">
         <Routes>

@@ -30,3 +30,7 @@ export function forgetEntry(id) {
 export function findEntry(id) {
   return readAll().find((e) => e.id === id) || null;
 }
+
+export function getAllEntries() {
+  return readAll();
+}
