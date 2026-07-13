@@ -41,8 +41,19 @@ function NewFeaturesBanner() {
         >
           New
         </span>
-        <p className="text-sm font-bold flex-1 min-w-[220px]" style={{ color: "var(--ink)" }}>
-          {FEATURES.join("  •  ")}
+        <p className="text-sm font-bold flex-1 min-w-[220px] flex flex-wrap items-center gap-x-2 gap-y-1" style={{ color: "var(--ink)" }}>
+          {FEATURES.map((f, i) => (
+            <span key={f.text} className="flex items-center gap-2">
+              {i > 0 && <span aria-hidden="true" style={{ color: "var(--ink-soft)" }}>•</span>}
+              {f.to ? (
+                <Link to={f.to} onClick={dismiss} className="underline decoration-2 hover:opacity-80 transition-opacity" style={{ textUnderlineOffset: "3px" }}>
+                  {f.text}
+                </Link>
+              ) : (
+                <span>{f.text}</span>
+              )}
+            </span>
+          ))}
         </p>
         <button
           type="button"

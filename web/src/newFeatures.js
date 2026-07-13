@@ -3,10 +3,10 @@
 export const FEATURES_VERSION = "2026-07-13b";
 
 export const FEATURES = [
-  "Roommate vibe quiz — sleep schedule, tidiness, smoking, alcohol, and more",
-  "Already added yourself? Go to Browse and fill in your vibe answers anytime",
-  "Parent Stay page — real hotels near campus, ordered closest to farthest",
-  "Room-full alerts — get notified in-app when your room fills up",
+  { text: "Roommate vibe quiz — sleep schedule, tidiness, smoking, alcohol, and more", to: "/add" },
+  { text: "Already added yourself? Fill in your vibe answers anytime", to: "/browse" },
+  { text: "Parent Stay page — real hotels near campus, ordered closest to farthest", to: "/stay" },
+  { text: "Room-full alerts — get notified in-app when your room fills up", to: null },
 ];
 
 const KEY = "hostelmate:seenFeaturesVersion";
