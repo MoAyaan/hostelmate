@@ -18,6 +18,9 @@ const QUIZ_VALUES = {
   tidiness: new Set(["very_tidy", "average", "relaxed"]),
   noisePref: new Set(["need_quiet", "some_noise_ok", "dont_mind"]),
   socialStyle: new Set(["loves_guests", "occasional_guests", "prefers_privacy"]),
+  smoking: new Set(["smoker", "non_smoker", "okay_either_way"]),
+  alcohol: new Set(["drinks", "doesnt_drink", "no_preference"]),
+  sharing: new Set(["happy_to_share", "keep_separate", "occasional_sharing"]),
 };
 
 function quizValue(field, value) {
@@ -58,6 +61,9 @@ function serializeOccupant(row) {
     tidiness: row.tidiness || null,
     noisePref: row.noise_pref || null,
     socialStyle: row.social_style || null,
+    smoking: row.smoking || null,
+    alcohol: row.alcohol || null,
+    sharing: row.sharing || null,
   };
 }
 
@@ -227,6 +233,9 @@ app.post("/api/occupants", writeLimiter, async (req, res, next) => {
       tidiness,
       noisePref,
       socialStyle,
+      smoking,
+      alcohol,
+      sharing,
     } = req.body || {};
     const block = String(blockRaw || "").toUpperCase();
 
@@ -297,8 +306,8 @@ app.post("/api/occupants", writeLimiter, async (req, res, next) => {
         [block, parsed.code, capacity]
       );
       const insertResult = await client.query(
-        `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone, branch, home_state, delete_token, ip_address, sleep_schedule, tidiness, noise_pref, social_style)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING id`,
+        `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone, branch, home_state, delete_token, ip_address, sleep_schedule, tidiness, noise_pref, social_style, smoking, alcohol, sharing)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING id`,
         [
           block,
           parsed.code,
@@ -316,6 +325,9 @@ app.post("/api/occupants", writeLimiter, async (req, res, next) => {
           quizValue("tidiness", tidiness),
           quizValue("noisePref", noisePref),
           quizValue("socialStyle", socialStyle),
+          quizValue("smoking", smoking),
+          quizValue("alcohol", alcohol),
+          quizValue("sharing", sharing),
         ]
       );
       await client.query("COMMIT");

@@ -83,9 +83,30 @@ export const SOCIAL_STYLES = [
   { value: "prefers_privacy", label: "Prefer privacy", emoji: "🚪" },
 ];
 
+export const SMOKING_PREFS = [
+  { value: "smoker", label: "Smoker", emoji: "🚬" },
+  { value: "non_smoker", label: "Non-smoker", emoji: "🚭" },
+  { value: "okay_either_way", label: "Okay either way", emoji: "😌" },
+];
+
+export const ALCOHOL_PREFS = [
+  { value: "drinks", label: "Drinks socially", emoji: "🍺" },
+  { value: "doesnt_drink", label: "Doesn't drink", emoji: "🚫" },
+  { value: "no_preference", label: "No preference", emoji: "😌" },
+];
+
+export const SHARING_PREFS = [
+  { value: "happy_to_share", label: "Happy to share toiletries etc.", emoji: "🤝" },
+  { value: "keep_separate", label: "Prefer to keep things separate", emoji: "🧴" },
+  { value: "occasional_sharing", label: "Occasional sharing is fine", emoji: "😌" },
+];
+
 export const QUIZ_FIELDS = [
   { key: "sleepSchedule", label: "Sleep schedule", options: SLEEP_SCHEDULES },
   { key: "tidiness", label: "Tidiness", options: TIDINESS_LEVELS },
   { key: "noisePref", label: "Noise preference", options: NOISE_PREFS },
   { key: "socialStyle", label: "Social style", options: SOCIAL_STYLES },
+  { key: "smoking", label: "Smoking", options: SMOKING_PREFS },
+  { key: "alcohol", label: "Alcohol", options: ALCOHOL_PREFS },
+  { key: "sharing", label: "Sharing toiletries", options: SHARING_PREFS },
 ];

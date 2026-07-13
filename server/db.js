@@ -35,6 +35,9 @@ export async function initDb() {
   await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS tidiness TEXT;`);
   await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS noise_pref TEXT;`);
   await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS social_style TEXT;`);
+  await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS smoking TEXT;`);
+  await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS alcohol TEXT;`);
+  await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS sharing TEXT;`);
 
   // capacity is decided by whoever adds themselves first to a given room,
   // since blocks like HB1/HB2 mix Double and Triple rooms with no way to tell from the room number alone.

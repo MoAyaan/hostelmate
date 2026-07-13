@@ -44,6 +44,9 @@ export default function Add() {
     tidiness: "",
     noisePref: "",
     socialStyle: "",
+    smoking: "",
+    alcohol: "",
+    sharing: "",
   });
   const [status, setStatus] = useState("idle"); // idle | submitting | done | error
   const [error, setError] = useState("");
