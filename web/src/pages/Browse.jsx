@@ -3,6 +3,37 @@ import { useLocation, Link } from "react-router-dom";
 import { getRooms, removeOccupant } from "../api.js";
 import { BLOCKS, STATUS_META } from "../blocks.js";
 import { findEntry, forgetEntry } from "../myEntries.js";
+import { QUIZ_FIELDS } from "../options.js";
+
+const QUIZ_LOOKUP = Object.fromEntries(
+  QUIZ_FIELDS.map((f) => [f.key, Object.fromEntries(f.options.map((o) => [o.value, o]))])
+);
+
+function quizTags(o) {
+  return QUIZ_FIELDS.map((f) => o[f.key] && QUIZ_LOOKUP[f.key][o[f.key]])
+    .filter(Boolean)
+    .map((opt) => `${opt.emoji} ${opt.label}`)
+    .join(" · ");
+}
+
+function computeVibeMatch(occupants) {
+  const fields = QUIZ_FIELDS.map((f) => f.key);
+  let matches = 0;
+  let total = 0;
+  for (let i = 0; i < occupants.length; i++) {
+    for (let j = i + 1; j < occupants.length; j++) {
+      for (const key of fields) {
+        const a = occupants[i][key];
+        const b = occupants[j][key];
+        if (a && b) {
+          total++;
+          if (a === b) matches++;
+        }
+      }
+    }
+  }
+  return total === 0 ? null : Math.round((matches / total) * 100);
+}
 
 function RoomTag({ room, onSelect, isSelected }) {
   const meta = STATUS_META[room.status];
@@ -41,6 +72,8 @@ function RoomDetail({ room, block, onChanged }) {
   const [removeError, setRemoveError] = useState("");
   if (!room) return null;
   const meta = STATUS_META[room.status];
+  const vibeMatch = computeVibeMatch(room.occupants);
+  const vibeTone = vibeMatch == null ? null : vibeMatch >= 70 ? "mint" : vibeMatch >= 40 ? "amber" : "coral";
 
   async function handleRemove(occupantId) {
     const entry = findEntry(occupantId);
@@ -73,6 +106,18 @@ function RoomDetail({ room, block, onChanged }) {
           {meta.label} · {room.occupants.length}/{room.capacity}
         </span>
       </div>
+      {vibeMatch != null && (
+        <p
+          className="mt-2 inline-block text-xs font-extrabold rounded-full px-2.5 py-1"
+          style={{
+            background: `color-mix(in srgb, var(--${vibeTone}) 20%, transparent)`,
+            color: `var(--${vibeTone}-ink)`,
+            boxShadow: `0 0 9px 1px color-mix(in srgb, var(--${vibeTone}) 40%, transparent)`,
+          }}
+        >
+          🧬 {vibeMatch}% vibe match
+        </p>
+      )}
       {room.occupants.length === 0 ? (
         <p className="mt-3 text-sm" style={{ color: "var(--ink-soft)" }}>Nobody's claimed this room yet.</p>
       ) : (
@@ -94,6 +139,9 @@ function RoomDetail({ room, block, onChanged }) {
                   <p style={{ color: "var(--ink-soft)" }}>
                     {[o.instagram && `IG ${o.instagram}`, o.discord && `Discord ${o.discord}`, o.reddit && o.reddit, o.phone && `📱 ${o.phone}`].filter(Boolean).join(" · ") || "No socials shared"}
                   </p>
+                  {quizTags(o) && (
+                    <p className="mt-1 text-xs" style={{ color: "var(--ink-soft)" }}>{quizTags(o)}</p>
+                  )}
                 </div>
                 {mine && (
                   <button

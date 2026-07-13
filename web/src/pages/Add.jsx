@@ -3,7 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import { addOccupant, getRoom, removeOccupant } from "../api.js";
 import { BLOCKS, GENDER_META, CAPACITY_LABEL } from "../blocks.js";
 import { rememberEntry, forgetEntry } from "../myEntries.js";
-import { BRANCHES, HOME_STATES, OTHER } from "../options.js";
+import { BRANCHES, HOME_STATES, OTHER, QUIZ_FIELDS } from "../options.js";
 
 function Confetti() {
   const pieces = Array.from({ length: 16 });
@@ -40,6 +40,10 @@ export default function Add() {
     instagram: "",
     discord: "",
     phone: "",
+    sleepSchedule: "",
+    tidiness: "",
+    noisePref: "",
+    socialStyle: "",
   });
   const [status, setStatus] = useState("idle"); // idle | submitting | done | error
   const [error, setError] = useState("");
@@ -298,6 +302,29 @@ export default function Add() {
                 style={{ borderColor: "var(--line-strong)", background: "var(--bg)" }}
               />
             )}
+          </div>
+        </div>
+
+        <div className="rounded-xl p-4" style={{ background: "var(--surface-2)" }}>
+          <p className="text-xs font-extrabold uppercase" style={{ color: "var(--ink-soft)" }}>🧬 Roommate vibe (optional)</p>
+          <p className="text-xs mt-1" style={{ color: "var(--ink-soft)" }}>Answer a few to show roommates a quick compatibility read — not a hard filter.</p>
+          <div className="grid sm:grid-cols-2 gap-3 mt-3">
+            {QUIZ_FIELDS.map((field) => (
+              <div key={field.key}>
+                <label className="text-xs font-bold" style={{ color: "var(--ink-soft)" }}>{field.label}</label>
+                <select
+                  value={form[field.key]}
+                  onChange={(e) => update(field.key, e.target.value)}
+                  className="mt-1 w-full rounded-lg px-3 py-2 border-2 text-sm"
+                  style={{ borderColor: "var(--line-strong)", background: "var(--bg)" }}
+                >
+                  <option value="">Skip</option>
+                  {field.options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.emoji} {opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
           </div>
         </div>
 

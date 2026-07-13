@@ -29,8 +29,12 @@ export async function initDb() {
     );
   `);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_occupants_block_room ON occupants(block, room);`);
-  // the production table already existed before ip_address was added, so migrate it in.
+  // the production table already existed before these columns were added, so migrate them in.
   await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS ip_address TEXT;`);
+  await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS sleep_schedule TEXT;`);
+  await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS tidiness TEXT;`);
+  await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS noise_pref TEXT;`);
+  await pool.query(`ALTER TABLE occupants ADD COLUMN IF NOT EXISTS social_style TEXT;`);
 
   // capacity is decided by whoever adds themselves first to a given room,
   // since blocks like HB1/HB2 mix Double and Triple rooms with no way to tell from the room number alone.

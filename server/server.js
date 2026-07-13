@@ -12,6 +12,18 @@ app.use(express.json({ limit: "20kb" }));
 
 const LIMITS = { name: 80, handle: 60, phone: 30, freeText: 100 };
 
+// Mirrors web/src/options.js QUIZ_FIELDS — kept in sync manually since it's a small, stable list.
+const QUIZ_VALUES = {
+  sleepSchedule: new Set(["early_bird", "night_owl", "flexible"]),
+  tidiness: new Set(["very_tidy", "average", "relaxed"]),
+  noisePref: new Set(["need_quiet", "some_noise_ok", "dont_mind"]),
+  socialStyle: new Set(["loves_guests", "occasional_guests", "prefers_privacy"]),
+};
+
+function quizValue(field, value) {
+  return QUIZ_VALUES[field].has(value) ? value : null;
+}
+
 function clip(value, max) {
   if (!value) return null;
   const trimmed = String(value).trim();
@@ -42,6 +54,10 @@ function serializeOccupant(row) {
     phone: row.phone || null,
     branch: row.branch || null,
     homeState: row.home_state || null,
+    sleepSchedule: row.sleep_schedule || null,
+    tidiness: row.tidiness || null,
+    noisePref: row.noise_pref || null,
+    socialStyle: row.social_style || null,
   };
 }
 
@@ -196,7 +212,22 @@ app.get("/api/recent", async (req, res, next) => {
 // POST /api/occupants — add yourself to a room
 app.post("/api/occupants", writeLimiter, async (req, res, next) => {
   try {
-    const { block: blockRaw, room: roomRaw, roomCapacity, name, reddit, instagram, discord, phone, branch, homeState } = req.body || {};
+    const {
+      block: blockRaw,
+      room: roomRaw,
+      roomCapacity,
+      name,
+      reddit,
+      instagram,
+      discord,
+      phone,
+      branch,
+      homeState,
+      sleepSchedule,
+      tidiness,
+      noisePref,
+      socialStyle,
+    } = req.body || {};
     const block = String(blockRaw || "").toUpperCase();
 
     if (!BLOCKS[block]) return res.status(400).json({ error: "Pick a valid block." });
@@ -266,8 +297,8 @@ app.post("/api/occupants", writeLimiter, async (req, res, next) => {
         [block, parsed.code, capacity]
       );
       const insertResult = await client.query(
-        `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone, branch, home_state, delete_token, ip_address)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+        `INSERT INTO occupants (block, room, floor, name, reddit, instagram, discord, phone, branch, home_state, delete_token, ip_address, sleep_schedule, tidiness, noise_pref, social_style)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING id`,
         [
           block,
           parsed.code,
@@ -281,6 +312,10 @@ app.post("/api/occupants", writeLimiter, async (req, res, next) => {
           clip(homeState, LIMITS.freeText),
           deleteToken,
           req.ip || null,
+          quizValue("sleepSchedule", sleepSchedule),
+          quizValue("tidiness", tidiness),
+          quizValue("noisePref", noisePref),
+          quizValue("socialStyle", socialStyle),
         ]
       );
       await client.query("COMMIT");
