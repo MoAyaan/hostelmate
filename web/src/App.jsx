@@ -217,7 +217,7 @@ function Footer() {
       <div className="max-w-6xl mx-auto px-6 flex flex-col gap-2 text-sm" style={{ color: "var(--ink-soft)" }}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="font-display">HostelMate — MIT Bangalore</span>
-          <span>Built by a hosteller, for hostellers. Not an official MIT Bangalore service.</span>
+          <span>Built by hostellers, for hostellers. Not an official MIT Bangalore service.</span>
         </div>
         <div
           className="inline-flex w-fit rounded-lg px-3 py-2 text-xs"
