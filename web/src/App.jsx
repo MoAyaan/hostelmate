@@ -223,7 +223,7 @@ function Footer() {
           className="inline-flex w-fit rounded-lg px-3 py-2 text-xs"
           style={{ background: "var(--surface-2)", color: "var(--ink-soft)" }}
         >
-          Contact: Ayaan · HB5, Room 710 · 9845413074
+          Found a bug or have a suggestion? Contact Ayaan · 9845413074 · HB5, Room 710
         </div>
       </div>
     </footer>
