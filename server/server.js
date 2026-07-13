@@ -352,6 +352,42 @@ app.post("/api/occupants", writeLimiter, async (req, res, next) => {
   }
 });
 
+// PATCH /api/occupants/:id/quiz — fill in or update your vibe-quiz answers after the fact
+app.patch("/api/occupants/:id/quiz", writeLimiter, async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const { deleteToken, sleepSchedule, tidiness, noisePref, socialStyle, smoking, alcohol, sharing } = req.body || {};
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: "That's not a valid entry." });
+    }
+
+    const { rows } = await pool.query(`SELECT id, delete_token FROM occupants WHERE id = $1`, [id]);
+    const row = rows[0];
+    if (!row) return res.status(404).json({ error: "That entry is already gone." });
+    if (!deleteToken || row.delete_token !== deleteToken) {
+      return res.status(403).json({ error: "That's not your entry to edit." });
+    }
+
+    await pool.query(
+      `UPDATE occupants SET sleep_schedule = $1, tidiness = $2, noise_pref = $3, social_style = $4, smoking = $5, alcohol = $6, sharing = $7 WHERE id = $8`,
+      [
+        quizValue("sleepSchedule", sleepSchedule),
+        quizValue("tidiness", tidiness),
+        quizValue("noisePref", noisePref),
+        quizValue("socialStyle", socialStyle),
+        quizValue("smoking", smoking),
+        quizValue("alcohol", alcohol),
+        quizValue("sharing", sharing),
+        id,
+      ]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // DELETE /api/occupants/:id — remove yourself (e.g. picked the wrong room)
 app.delete("/api/occupants/:id", writeLimiter, async (req, res, next) => {
   try {

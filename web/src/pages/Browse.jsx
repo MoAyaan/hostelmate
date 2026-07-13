@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { getRooms, removeOccupant } from "../api.js";
+import { getRooms, removeOccupant, updateQuiz } from "../api.js";
 import { BLOCKS, STATUS_META } from "../blocks.js";
 import { findEntry, forgetEntry } from "../myEntries.js";
 import { QUIZ_FIELDS } from "../options.js";
@@ -33,6 +33,72 @@ function computeVibeMatch(occupants) {
     }
   }
   return total === 0 ? null : Math.round((matches / total) * 100);
+}
+
+function VibeEditor({ occupant, onSaved, onCancel }) {
+  const [values, setValues] = useState(() =>
+    Object.fromEntries(QUIZ_FIELDS.map((f) => [f.key, occupant[f.key] || ""]))
+  );
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function save() {
+    const entry = findEntry(occupant.id);
+    if (!entry) return;
+    setSaving(true);
+    setError("");
+    try {
+      await updateQuiz(occupant.id, entry.deleteToken, values);
+      onSaved();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-xl p-3 animate-popIn" style={{ background: "var(--bg)" }}>
+      <div className="grid sm:grid-cols-2 gap-3">
+        {QUIZ_FIELDS.map((field) => (
+          <div key={field.key}>
+            <label className="text-xs font-bold" style={{ color: "var(--ink-soft)" }}>{field.label}</label>
+            <select
+              value={values[field.key]}
+              onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+              className="mt-1 w-full rounded-lg px-2 py-1.5 border-2 text-sm"
+              style={{ borderColor: "var(--line-strong)", background: "var(--surface)" }}
+            >
+              <option value="">Skip</option>
+              {field.options.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        ))}
+      </div>
+      {error && <p className="mt-2 text-xs font-semibold" style={{ color: "var(--coral-ink)" }}>⚠️ {error}</p>}
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving}
+          className="rounded-full px-4 py-1.5 text-xs font-bold text-white disabled:opacity-60"
+          style={{ background: "var(--violet)" }}
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-full px-4 py-1.5 text-xs font-bold"
+          style={{ color: "var(--ink-soft)" }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function RoomTag({ room, onSelect, isSelected }) {
@@ -70,6 +136,7 @@ function RoomTag({ room, onSelect, isSelected }) {
 function RoomDetail({ room, block, onChanged }) {
   const [removingId, setRemovingId] = useState(null);
   const [removeError, setRemoveError] = useState("");
+  const [editingId, setEditingId] = useState(null);
   if (!room) return null;
   const meta = STATUS_META[room.status];
   const vibeMatch = computeVibeMatch(room.occupants);
@@ -142,18 +209,39 @@ function RoomDetail({ room, block, onChanged }) {
                   {quizTags(o) && (
                     <p className="mt-1 text-xs" style={{ color: "var(--ink-soft)" }}>{quizTags(o)}</p>
                   )}
+                  {mine && editingId === o.id && (
+                    <VibeEditor
+                      occupant={o}
+                      onSaved={() => {
+                        setEditingId(null);
+                        onChanged();
+                      }}
+                      onCancel={() => setEditingId(null)}
+                    />
+                  )}
                 </div>
-                {mine && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(o.id)}
-                    disabled={removingId === o.id}
-                    className="shrink-0 text-xs font-bold rounded-full px-2.5 py-1 disabled:opacity-60"
-                    style={{ color: "var(--coral-ink)", background: "color-mix(in srgb, var(--coral) 18%, transparent)" }}
-                    title="Wrong room? Remove yourself"
-                  >
-                    {removingId === o.id ? "…" : "✕ Remove"}
-                  </button>
+                {mine && editingId !== o.id && (
+                  <div className="shrink-0 flex flex-col gap-1.5 items-end">
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(o.id)}
+                      className="text-xs font-bold rounded-full px-2.5 py-1"
+                      style={{ color: "var(--violet-ink)", background: "color-mix(in srgb, var(--violet) 18%, transparent)" }}
+                      title="Fill in or update your vibe quiz answers"
+                    >
+                      {quizTags(o) ? "Edit vibe" : "Add vibe answers"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(o.id)}
+                      disabled={removingId === o.id}
+                      className="text-xs font-bold rounded-full px-2.5 py-1 disabled:opacity-60"
+                      style={{ color: "var(--coral-ink)", background: "color-mix(in srgb, var(--coral) 18%, transparent)" }}
+                      title="Wrong room? Remove yourself"
+                    >
+                      {removingId === o.id ? "…" : "✕ Remove"}
+                    </button>
+                  </div>
                 )}
               </li>
             );

@@ -21,3 +21,5 @@ export const addOccupant = (payload) =>
   request("/occupants", { method: "POST", body: JSON.stringify(payload) });
 export const removeOccupant = (id, deleteToken) =>
   request(`/occupants/${encodeURIComponent(id)}`, { method: "DELETE", body: JSON.stringify({ deleteToken }) });
+export const updateQuiz = (id, deleteToken, quizAnswers) =>
+  request(`/occupants/${encodeURIComponent(id)}/quiz`, { method: "PATCH", body: JSON.stringify({ deleteToken, ...quizAnswers }) });
