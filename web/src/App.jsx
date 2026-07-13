@@ -9,19 +9,14 @@ import Stay from "./pages/Stay.jsx";
 import { getRoom } from "./api.js";
 import { getAllEntries } from "./myEntries.js";
 import { wasNotified, markNotified } from "./roomAlerts.js";
-import { FEATURES_VERSION, FEATURES, wasFeaturesVersionSeen, markFeaturesVersionSeen } from "./newFeatures.js";
+import { FEATURES } from "./newFeatures.js";
 
 function NewFeaturesBanner() {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    setShow(!wasFeaturesVersionSeen(FEATURES_VERSION));
-  }, []);
+  const [show, setShow] = useState(true);
 
   if (!show) return null;
 
   function dismiss() {
-    markFeaturesVersionSeen(FEATURES_VERSION);
     setShow(false);
   }
 
