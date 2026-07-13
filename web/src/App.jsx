@@ -41,20 +41,33 @@ function NewFeaturesBanner() {
         >
           New
         </span>
-        <p className="text-sm font-bold flex-1 min-w-[220px] flex flex-wrap items-center gap-x-2 gap-y-1" style={{ color: "var(--ink)" }}>
-          {FEATURES.map((f, i) => (
-            <span key={f.text} className="flex items-center gap-2">
-              {i > 0 && <span aria-hidden="true" style={{ color: "var(--ink-soft)" }}>•</span>}
-              {f.to ? (
-                <Link to={f.to} onClick={dismiss} className="underline decoration-2 hover:opacity-80 transition-opacity" style={{ textUnderlineOffset: "3px" }}>
-                  {f.text}
-                </Link>
-              ) : (
-                <span>{f.text}</span>
-              )}
-            </span>
-          ))}
-        </p>
+        <div className="flex-1 min-w-[220px] flex flex-wrap items-center gap-2">
+          {FEATURES.map((f, i) => {
+            const accent = ["violet", "pink", "mint", "amber"][i % 4];
+            const chipStyle = {
+              background: `color-mix(in srgb, var(--${accent}) 22%, var(--surface))`,
+              color: "var(--ink)",
+              border: `1px solid color-mix(in srgb, var(--${accent}) 55%, transparent)`,
+              "--glow-a": `0 0 8px 1px color-mix(in srgb, var(--${accent}) 45%, transparent)`,
+              "--glow-b": `0 0 18px 3px color-mix(in srgb, var(--${accent}) 80%, transparent), 0 0 30px 7px color-mix(in srgb, var(--${accent}) 45%, transparent)`,
+            };
+            return f.to ? (
+              <Link
+                key={f.text}
+                to={f.to}
+                onClick={dismiss}
+                className="neon-chip text-xs font-bold rounded-full px-3 py-1.5"
+                style={chipStyle}
+              >
+                {f.text}
+              </Link>
+            ) : (
+              <span key={f.text} className="neon-chip text-xs font-bold rounded-full px-3 py-1.5" style={chipStyle}>
+                {f.text}
+              </span>
+            );
+          })}
+        </div>
         <button
           type="button"
           onClick={dismiss}

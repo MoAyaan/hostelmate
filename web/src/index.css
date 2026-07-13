@@ -126,3 +126,7 @@ body{
 
 .glow-card{ transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease; }
 .glow-card:hover, .glow-card:focus-within{ transform: translateY(-5px); box-shadow: var(--hover-glow); }
+
+@keyframes chipGlow{ 0%,100%{ box-shadow: var(--glow-a); } 50%{ box-shadow: var(--glow-b); } }
+.neon-chip{ animation: chipGlow 2.2s ease-in-out infinite; transition: transform .2s ease; display: inline-block; }
+.neon-chip:hover{ transform: translateY(-2px); }
