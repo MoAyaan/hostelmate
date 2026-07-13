@@ -112,6 +112,14 @@ body{
 @keyframes dash{ to{ stroke-dashoffset: -100; } }
 @keyframes spinSlow{ to{ transform: rotate(360deg); } }
 @keyframes pulseRing{ 0%{ transform: scale(0.7); opacity:.8; } 100%{ transform: scale(2.2); opacity:0; } }
+@keyframes neonPulse{
+  0%,100%{ box-shadow: 0 0 18px 2px color-mix(in srgb, var(--violet) 60%, transparent), 0 0 34px 6px color-mix(in srgb, var(--pink) 40%, transparent); }
+  50%{ box-shadow: 0 0 30px 5px color-mix(in srgb, var(--violet) 85%, transparent), 0 0 54px 12px color-mix(in srgb, var(--pink) 65%, transparent); }
+}
+@keyframes neonBorder{
+  0%,100%{ border-color: var(--violet); }
+  50%{ border-color: var(--pink); }
+}
 
 .animate-riseIn{ animation: riseIn .6s cubic-bezier(.2,.8,.2,1) both; }
 .animate-popIn{ animation: popIn .45s cubic-bezier(.2,1.4,.4,1) both; }

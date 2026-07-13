@@ -9,6 +9,53 @@ import Stay from "./pages/Stay.jsx";
 import { getRoom } from "./api.js";
 import { getAllEntries } from "./myEntries.js";
 import { wasNotified, markNotified } from "./roomAlerts.js";
+import { FEATURES_VERSION, FEATURES, wasFeaturesVersionSeen, markFeaturesVersionSeen } from "./newFeatures.js";
+
+function NewFeaturesBanner() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    setShow(!wasFeaturesVersionSeen(FEATURES_VERSION));
+  }, []);
+
+  if (!show) return null;
+
+  function dismiss() {
+    markFeaturesVersionSeen(FEATURES_VERSION);
+    setShow(false);
+  }
+
+  return (
+    <div
+      className="relative animate-riseIn"
+      style={{
+        background: "linear-gradient(90deg, color-mix(in srgb, var(--violet) 30%, var(--surface)), color-mix(in srgb, var(--pink) 30%, var(--surface)))",
+        borderBottom: "3px solid var(--pink)",
+        animation: "neonBorder 2.4s ease-in-out infinite, neonPulse 2.4s ease-in-out infinite",
+      }}
+    >
+      <div className="max-w-6xl mx-auto px-6 py-3.5 flex items-center gap-4 flex-wrap">
+        <span
+          className="shrink-0 rounded-full px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wide text-white"
+          style={{ background: "linear-gradient(90deg, var(--violet), var(--pink))" }}
+        >
+          New
+        </span>
+        <p className="text-sm font-bold flex-1 min-w-[220px]" style={{ color: "var(--ink)" }}>
+          {FEATURES.join("  •  ")}
+        </p>
+        <button
+          type="button"
+          onClick={dismiss}
+          className="shrink-0 rounded-full px-3 py-1.5 text-xs font-extrabold"
+          style={{ background: "color-mix(in srgb, var(--ink) 15%, transparent)", color: "var(--ink)" }}
+        >
+          Dismiss ✕
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function RoomFullBanner() {
   const [alert, setAlert] = useState(null);
@@ -174,6 +221,7 @@ function NotFound() {
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
+      <NewFeaturesBanner />
       <RoomFullBanner />
       <Nav />
       <main className="flex-1">
